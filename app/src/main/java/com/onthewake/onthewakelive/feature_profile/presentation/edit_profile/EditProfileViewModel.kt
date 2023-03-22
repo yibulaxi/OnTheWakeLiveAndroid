@@ -1,21 +1,18 @@
 package com.onthewake.onthewakelive.feature_profile.presentation.edit_profile
 
-import android.app.Application
-import android.content.SharedPreferences
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.datastore.core.DataStore
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.dataStore
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
-import com.onthewake.onthewakelive.core.utils.Constants.PREFS_FIRST_NAME
 import com.onthewake.onthewakelive.core.utils.Resource
-import com.onthewake.onthewakelive.core.utils.put
 import com.onthewake.onthewakelive.feature_auth.domain.use_case.ValidationUseCase
+import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import com.onthewake.onthewakelive.feature_profile.domain.module.UpdateProfileData
 import com.onthewake.onthewakelive.feature_profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,9 +27,8 @@ import javax.inject.Inject
 class EditProfileViewModel @Inject constructor(
     private val validationUseCase: ValidationUseCase,
     private val profileRepository: ProfileRepository,
-    private val context: Application,
-    private val prefs: SharedPreferences
-) : AndroidViewModel(context) {
+    private val dataStore: DataStore<Profile>
+) : ViewModel() {
 
     var state by mutableStateOf(EditProfileState())
 
@@ -78,10 +74,8 @@ class EditProfileViewModel @Inject constructor(
     }
 
     private fun updateDataFromDataStore() {
-
-        // TODO remove context from viewModel
         viewModelScope.launch {
-            context.dataStore.data.collectLatest { profile ->
+            dataStore.data.collectLatest { profile ->
                 state = state.copy(
                     firstName = profile.firstName,
                     lastName = profile.lastName,
@@ -138,10 +132,7 @@ class EditProfileViewModel @Inject constructor(
                 ),
                 selectedProfilePictureUri = selectedProfilePictureUri.value
             )
-
             _selectedProfilePictureUri.value = null
-            prefs.put(PREFS_FIRST_NAME, state.firstName.trim())
-
             state = state.copy(isLoading = false)
 
             when (result) {

@@ -7,13 +7,14 @@ import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
 import com.onesignal.OneSignal
-import com.onthewake.onthewakelive.core.presentation.dataStore
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_FIRST_NAME
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_JWT_TOKEN
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
 import com.onthewake.onthewakelive.core.utils.Resource
+import com.onthewake.onthewakelive.core.utils.UserProfileSerializer
 import com.onthewake.onthewakelive.core.utils.handleNetworkError
 import com.onthewake.onthewakelive.core.utils.put
+import com.onthewake.onthewakelive.di.AppModule.dataStore
 import com.onthewake.onthewakelive.feature_auth.data.remote.AuthApi
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.AuthRequest
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.CreateAccountRequest
@@ -167,5 +168,10 @@ class AuthRepositoryImpl(
         if (exception.code() == 401) AuthResult.Unauthorized else AuthResult.UnknownError
     } catch (exception: Exception) {
         AuthResult.UnknownError
+    }
+
+    override suspend fun logout() {
+        sharedPreferences.edit().clear().apply()
+        context.dataStore.updateData { UserProfileSerializer.defaultValue }
     }
 }

@@ -33,9 +33,9 @@ import com.onthewake.onthewakelive.core.presentation.components.FormattedDateOfB
 import com.onthewake.onthewakelive.core.presentation.components.ProfileItem
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
-import com.onthewake.onthewakelive.core.presentation.dataStore
 import com.onthewake.onthewakelive.core.utils.UserProfileSerializer.defaultValue
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
+import com.onthewake.onthewakelive.di.AppModule.dataStore
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 
@@ -60,9 +60,8 @@ fun ProfileScreen(
         )
     }
 
-    val dataStore = remember {
-        context.dataStore.data
-    }.collectAsState(initial = defaultValue)
+    val dataStore by context.dataStore.data
+        .collectAsState(initial = defaultValue)
 
     LaunchedEffect(key1 = true) {
         viewModel.snackBarEvent.collectLatest { message ->
@@ -71,12 +70,12 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(key1 = true) {
-        if (dataStore.value.firstName.isEmpty() || dataStore.value.lastName.isEmpty()) {
+        if (dataStore.firstName.isEmpty() || dataStore.lastName.isEmpty()) {
             viewModel.getProfile()
         }
     }
 
-    AnimatedContent(targetState = viewModel.isLoading.value) { isLoading ->
+    AnimatedContent(targetState = viewModel.isLoading) { isLoading ->
         if (isLoading) StandardLoadingView()
         else Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -151,7 +150,7 @@ fun ProfileScreen(
                             ) {
                                 StandardImageView(
                                     imageLoader = imageLoader,
-                                    model = dataStore.value.profilePictureUri,
+                                    model = dataStore.profilePictureUri,
                                     onUserAvatarClicked = { pictureUrl ->
                                         navController.navigate(
                                             Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
@@ -161,14 +160,14 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = dataStore.value.firstName,
+                                        text = dataStore.firstName,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(1.dp))
                                     Text(
-                                        text = dataStore.value.lastName,
+                                        text = dataStore.lastName,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -185,13 +184,13 @@ fun ProfileScreen(
                     ) {
                         ProfileItem(
                             title = stringResource(id = R.string.instagram),
-                            subtitle = dataStore.value.instagram
+                            subtitle = dataStore.instagram
                         )
-                        if (dataStore.value.instagram.isNotEmpty()) {
+                        if (dataStore.instagram.isNotEmpty()) {
                             IconButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    context.openInstagramProfile(dataStore.value.instagram)
+                                    context.openInstagramProfile(dataStore.instagram)
                                 }
                             ) {
                                 Icon(
@@ -204,15 +203,15 @@ fun ProfileScreen(
                     Divider(modifier = Modifier.padding(vertical = 18.dp))
                     ProfileItem(
                         title = stringResource(id = R.string.telegram),
-                        subtitle = dataStore.value.telegram
+                        subtitle = dataStore.telegram
                     )
                     Divider(modifier = Modifier.padding(vertical = 18.dp))
                     ProfileItem(
                         title = stringResource(id = R.string.phone_number),
-                        subtitle = dataStore.value.phoneNumber
+                        subtitle = dataStore.phoneNumber
                     )
                     Divider(modifier = Modifier.padding(vertical = 18.dp))
-                    FormattedDateOfBirth(dataStore.value.dateOfBirth)
+                    FormattedDateOfBirth(dataStore.dateOfBirth)
                 }
             }
         }

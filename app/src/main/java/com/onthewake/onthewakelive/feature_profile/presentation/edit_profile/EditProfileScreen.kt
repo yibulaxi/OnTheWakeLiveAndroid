@@ -39,9 +39,9 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
-import com.onthewake.onthewakelive.core.presentation.dataStore
 import com.onthewake.onthewakelive.core.utils.CropActivityResultContract
 import com.onthewake.onthewakelive.core.utils.UserProfileSerializer.defaultValue
+import com.onthewake.onthewakelive.di.AppModule.dataStore
 import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -53,7 +53,6 @@ fun EditProfileScreen(
     imageLoader: ImageLoader,
     navController: NavHostController
 ) {
-
     val state = viewModel.state
     val snackBarHostState = remember { SnackbarHostState() }
     val isImageLoading = remember { mutableStateOf(false) }
@@ -78,9 +77,8 @@ fun EditProfileScreen(
         )
     }
 
-    val dataStore = remember {
-        context.dataStore.data
-    }.collectAsState(initial = defaultValue)
+    val dataStore by context.dataStore.data
+        .collectAsState(initial = defaultValue)
 
     LaunchedEffect(key1 = true) {
         viewModel.snackBarEvent.collectLatest { message ->
@@ -280,13 +278,13 @@ fun EditProfileScreen(
                             Button(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    if (dataStore.value.firstName == state.firstName &&
-                                        dataStore.value.lastName == state.lastName &&
-                                        dataStore.value.phoneNumber == state.phoneNumber &&
+                                    if (dataStore.firstName == state.firstName &&
+                                        dataStore.lastName == state.lastName &&
+                                        dataStore.phoneNumber == state.phoneNumber &&
                                         viewModel.selectedProfilePictureUri.value == null &&
-                                        dataStore.value.instagram == state.instagram &&
-                                        dataStore.value.telegram == state.telegram &&
-                                        dataStore.value.dateOfBirth == state.dateOfBirth
+                                        dataStore.instagram == state.instagram &&
+                                        dataStore.telegram == state.telegram &&
+                                        dataStore.dateOfBirth == state.dateOfBirth
                                     ) {
                                         scope.launch {
                                             snackBarHostState.showSnackbar(

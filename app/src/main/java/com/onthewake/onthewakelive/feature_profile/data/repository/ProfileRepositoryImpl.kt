@@ -4,11 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
-import com.onthewake.onthewakelive.core.presentation.dataStore
-import com.onthewake.onthewakelive.core.utils.Constants
-import com.onthewake.onthewakelive.core.utils.Resource
-import com.onthewake.onthewakelive.core.utils.SimpleResource
-import com.onthewake.onthewakelive.core.utils.handleNetworkError
+import com.onthewake.onthewakelive.core.utils.*
+import com.onthewake.onthewakelive.di.AppModule.dataStore
 import com.onthewake.onthewakelive.feature_profile.data.remote.ProfileApi
 import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import com.onthewake.onthewakelive.feature_profile.domain.module.UpdateProfileData
@@ -25,6 +22,19 @@ class ProfileRepositoryImpl(
 
     override suspend fun getProfile(): Resource<Profile> = try {
         val response = profileApi.getProfile()
+
+        context.dataStore.updateData { profile ->
+            profile.copy(
+                firstName = response.firstName,
+                lastName = response.lastName,
+                phoneNumber = response.phoneNumber,
+                instagram = response.instagram,
+                telegram = response.telegram,
+                dateOfBirth = response.dateOfBirth,
+                profilePictureUri = response.profilePictureUri
+            )
+        }
+
         Resource.Success(response.toProfile())
     } catch (exception: Exception) {
         Resource.Error(handleNetworkError(exception))
@@ -60,6 +70,8 @@ class ProfileRepositoryImpl(
                 profilePictureUri = updateProfileData.profilePictureUri
             )
         }
+        prefs.put(Constants.PREFS_FIRST_NAME, updateProfileData.firstName.trim())
+
         Resource.Success(Unit)
     } catch (exception: Exception) {
         Resource.Error(handleNetworkError(exception))

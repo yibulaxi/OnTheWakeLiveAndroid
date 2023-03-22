@@ -13,4 +13,5 @@ interface AuthRepository {
     suspend fun isUserAlreadyExists(phoneNumber: String): Resource<Boolean>
     suspend fun verifyOtp(otp: String): AuthResult
     suspend fun sendOtp(phoneNumber: String, isResendAction: Boolean, context: Context): AuthResult
+    suspend fun logout()
 }
