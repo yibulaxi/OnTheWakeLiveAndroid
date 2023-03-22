@@ -41,7 +41,7 @@ fun TabLayout(pagerState: PagerState) {
                 color = MaterialTheme.colorScheme.secondaryContainer
             )
         },
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
     ) {
         list.forEachIndexed { index, _ ->
             Tab(

@@ -29,7 +29,7 @@ import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OtpScreen(
@@ -39,6 +39,7 @@ fun OtpScreen(
     val state = viewModel.state.value
 
     val snackBarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 

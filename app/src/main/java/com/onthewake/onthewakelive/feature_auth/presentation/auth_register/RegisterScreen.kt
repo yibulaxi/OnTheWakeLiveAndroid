@@ -44,6 +44,7 @@ fun RegisterScreen(
     val state = viewModel.state.value
 
     val snackBarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val haptic = LocalHapticFeedback.current
@@ -75,9 +76,7 @@ fun RegisterScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
-    ) {
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         AnimatedContent(targetState = state.isLoading) { isLoading ->
             if (isLoading) StandardLoadingView()
             else Box(

@@ -3,7 +3,6 @@ package com.onthewake.onthewakelive.feature_profile.presentation.profile
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,12 +26,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.FormattedDateOfBirth
-import com.onthewake.onthewakelive.core.presentation.components.ProfileItem
+import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
+import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.UserProfileSerializer.defaultValue
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.di.AppModule.dataStore
@@ -46,19 +45,13 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     imageLoader: ImageLoader
 ) {
-    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-    val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    val systemUiController = rememberSystemUiController()
-    val darkTheme = isSystemInDarkTheme()
+    val snackBarHostState = remember { SnackbarHostState() }
 
-    SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = surfaceColor, darkIcons = !darkTheme
-        )
-    }
+    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+    SetSystemBarsColor(systemBarsColor = surfaceColor)
 
     val dataStore by context.dataStore.data
         .collectAsState(initial = defaultValue)
@@ -84,10 +77,7 @@ fun ProfileScreen(
                     title = {
                         Text(text = stringResource(id = R.string.profile))
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = surfaceColor,
-                        titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    ),
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor),
                     actions = {
                         IconButton(
                             onClick = {
@@ -182,35 +172,30 @@ fun ProfileScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        ProfileItem(
+                        UserDataItem(
                             title = stringResource(id = R.string.instagram),
                             subtitle = dataStore.instagram
                         )
-                        if (dataStore.instagram.isNotEmpty()) {
-                            IconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    context.openInstagramProfile(dataStore.instagram)
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowForward,
-                                    contentDescription = stringResource(id = R.string.right_arrow)
-                                )
+                        if (dataStore.instagram.isNotEmpty()) IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                context.openInstagramProfile(dataStore.instagram)
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = stringResource(id = R.string.right_arrow)
+                            )
                         }
                     }
-                    Divider(modifier = Modifier.padding(vertical = 18.dp))
-                    ProfileItem(
+                    UserDataItem(
                         title = stringResource(id = R.string.telegram),
                         subtitle = dataStore.telegram
                     )
-                    Divider(modifier = Modifier.padding(vertical = 18.dp))
-                    ProfileItem(
+                    UserDataItem(
                         title = stringResource(id = R.string.phone_number),
                         subtitle = dataStore.phoneNumber
                     )
-                    Divider(modifier = Modifier.padding(vertical = 18.dp))
                     FormattedDateOfBirth(dataStore.dateOfBirth)
                 }
             }

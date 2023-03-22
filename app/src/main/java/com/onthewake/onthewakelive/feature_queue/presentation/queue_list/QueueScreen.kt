@@ -69,7 +69,7 @@ fun QueueScreen(
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
     SetSystemBarsColor(systemBarsColor = surfaceColor)
 
     var hasNotificationPermission by remember {
@@ -151,10 +151,7 @@ fun QueueScreen(
                         textAlign = TextAlign.Center,
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = surfaceColor,
-                    titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor)
             )
         },
         floatingActionButton = {

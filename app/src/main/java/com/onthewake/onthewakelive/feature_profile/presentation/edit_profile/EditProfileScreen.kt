@@ -6,8 +6,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,10 +33,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
+import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.CropActivityResultContract
 import com.onthewake.onthewakelive.core.utils.UserProfileSerializer.defaultValue
 import com.onthewake.onthewakelive.di.AppModule.dataStore
@@ -62,20 +60,12 @@ fun EditProfileScreen(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
-    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-    val bgColor = MaterialTheme.colorScheme.background
+    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
 
-    val systemUiController = rememberSystemUiController()
-    val darkTheme = isSystemInDarkTheme()
-
-    SideEffect {
-        systemUiController.setStatusBarColor(
-            color = surfaceColor, darkIcons = !darkTheme
-        )
-        systemUiController.setNavigationBarColor(
-            color = bgColor, darkIcons = !darkTheme
-        )
-    }
+    SetSystemBarsColor(
+        statusBarColor = surfaceColor,
+        navigationBarColor = MaterialTheme.colorScheme.background
+    )
 
     val dataStore by context.dataStore.data
         .collectAsState(initial = defaultValue)
@@ -93,7 +83,7 @@ fun EditProfileScreen(
     }
 
     val cropActivityLauncher = rememberLauncherForActivityResult(
-        contract = CropActivityResultContract(16f, 16f)
+        contract = CropActivityResultContract()
     ) { viewModel.onEvent(CropImage(it)) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -112,8 +102,7 @@ fun EditProfileScreen(
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.edit_profile)) },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = surfaceColor,
-                        titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        containerColor = surfaceColor
                     ),
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
@@ -138,7 +127,6 @@ fun EditProfileScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(bgColor)
                             .padding(horizontal = 24.dp)
                     ) {
                         Column(

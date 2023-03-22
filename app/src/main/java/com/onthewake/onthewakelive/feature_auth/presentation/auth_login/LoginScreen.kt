@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
+import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.*
 import com.onthewake.onthewakelive.navigation.Screen
@@ -43,18 +42,12 @@ fun LoginScreen(
     val state = viewModel.state.value
 
     val snackBarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val systemUiController = rememberSystemUiController()
-    val darkTheme = isSystemInDarkTheme()
     val haptic = LocalHapticFeedback.current
-    val systemBarsColor = MaterialTheme.colorScheme.background
 
-    SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = systemBarsColor, darkIcons = !darkTheme
-        )
-    }
+    SetSystemBarsColor(systemBarsColor = MaterialTheme.colorScheme.background)
 
     LaunchedEffect(true) {
         viewModel.authResult.collect { result ->

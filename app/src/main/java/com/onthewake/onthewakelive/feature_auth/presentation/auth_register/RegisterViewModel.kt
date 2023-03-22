@@ -102,7 +102,6 @@ class RegisterViewModel @Inject constructor(
                     password = password
                 )
             )
-            println("_authResult.emit(result) $result")
             _authResult.emit(result)
 
             _state.value = state.value.copy(isLoading = false)
