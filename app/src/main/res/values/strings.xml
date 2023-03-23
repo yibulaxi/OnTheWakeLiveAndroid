@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OnTheWakeLive</string>
+    <string name="app_name">On The Wake Live</string>
 
     // Validation Errors
     <string name="validate_first_name_error">The first name can\'t be blank</string>
