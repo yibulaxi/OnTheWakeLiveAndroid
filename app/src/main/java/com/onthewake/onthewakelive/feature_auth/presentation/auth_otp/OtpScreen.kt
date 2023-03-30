@@ -63,7 +63,7 @@ fun OtpScreen(
         if (isLoading) StandardLoadingView()
         else Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-            topBar = { StandardTopBar(onBackClicked = { navController.popBackStack() }) }
+            topBar = { StandardTopBar(onBackClicked = navController::popBackStack) }
         ) {
             Box(
                 modifier = Modifier

@@ -29,7 +29,7 @@ fun FullSizeAvatarScreen(
     SetSystemBarsColor(systemBarsColor = MaterialTheme.colorScheme.background)
 
     Scaffold(
-        topBar = { StandardTopBar(onBackClicked = { navController.popBackStack() }) }
+        topBar = { StandardTopBar(onBackClicked = navController::popBackStack) }
     ) { paddingValues ->
         if (isImageLoading) StandardLoadingView()
 
