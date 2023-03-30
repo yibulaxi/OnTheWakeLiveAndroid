@@ -31,7 +31,6 @@ import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingV
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.navigation.Screen
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -53,9 +52,9 @@ fun QueueDetailsScreen(
         navigationBarColor = MaterialTheme.colorScheme.background
     )
 
-    LaunchedEffect(key1 = true) {
-        viewModel.snackBarEvent.collectLatest { message ->
-            snackBarHostState.showSnackbar(message = message.asString(context))
+    LaunchedEffect(key1 = state.error) {
+        state.error?.let { error ->
+            snackBarHostState.showSnackbar(message = error.asString(context))
         }
     }
 

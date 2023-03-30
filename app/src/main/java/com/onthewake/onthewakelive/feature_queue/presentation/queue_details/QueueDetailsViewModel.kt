@@ -1,16 +1,14 @@
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_details
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.core.utils.Constants.DETAILS_ARGUMENT_KEY
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,10 +18,8 @@ class QueueDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val state = mutableStateOf(QueueItemDetailsState())
-
-    private val _snackBarEvent = MutableSharedFlow<UIText>()
-    val snackBarEvent = _snackBarEvent.asSharedFlow()
+    private val _state = mutableStateOf(QueueItemDetailsState())
+    val state: State<QueueItemDetailsState> = _state
 
     init {
         savedStateHandle.get<String>(DETAILS_ARGUMENT_KEY)?.let { queueItemId ->
@@ -33,11 +29,11 @@ class QueueDetailsViewModel @Inject constructor(
 
     private fun loadQueueItemDetails(queueItemId: String) {
         viewModelScope.launch {
-            state.value = state.value.copy(isLoading = true)
+            _state.value = state.value.copy(isLoading = true)
             when (val result = queueService.getProfileDetails(queueItemId)) {
                 is Resource.Success -> {
                     result.data?.let {
-                        state.value = state.value.copy(
+                        _state.value = state.value.copy(
                             userId = it.userId,
                             firstName = it.firstName,
                             lastName = it.lastName,
@@ -49,9 +45,9 @@ class QueueDetailsViewModel @Inject constructor(
                         )
                     }
                 }
-                is Resource.Error -> _snackBarEvent.emit(result.message)
+                is Resource.Error -> _state.value = state.value.copy(error = result.message)
             }
-            state.value = state.value.copy(isLoading = false)
+            _state.value = state.value.copy(isLoading = false)
         }
     }
 }
