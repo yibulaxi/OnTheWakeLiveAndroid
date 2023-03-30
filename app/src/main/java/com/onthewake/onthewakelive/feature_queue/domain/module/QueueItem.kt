@@ -11,6 +11,6 @@ data class QueueItem(
     val firstName: String,
     val lastName: String,
     val profilePictureUri: String,
-    val isLeftQueue: Boolean,
+    val line: Line,
     val timestamp: Long
 )

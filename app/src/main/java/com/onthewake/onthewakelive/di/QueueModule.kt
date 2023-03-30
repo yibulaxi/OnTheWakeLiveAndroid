@@ -1,13 +1,9 @@
 package com.onthewake.onthewakelive.di
 
-import android.content.SharedPreferences
 import com.onthewake.onthewakelive.core.utils.Constants
-import com.onthewake.onthewakelive.core.utils.Constants.PREFS_JWT_TOKEN
 import com.onthewake.onthewakelive.feature_queue.data.remote.*
 import com.onthewake.onthewakelive.feature_queue.data.repository.QueueServiceImpl
-import com.onthewake.onthewakelive.feature_queue.data.repository.QueueSocketServiceImpl
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueService
-import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,38 +28,15 @@ object QueueModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(prefs: SharedPreferences): HttpClient = HttpClient(CIO) {
-        install(Logging)
-        install(WebSockets)
-        install(ContentNegotiation) {
-            json()
-        }
-        install(DefaultRequest) {
-            val token = prefs.getString(PREFS_JWT_TOKEN, null)
-            header("Authorization", "Bearer $token")
-            header(HttpHeaders.ContentType, ContentType.Application.Json)
-        }
-    }
-
-    @Provides
-    @Singleton
-    fun provideQueueApi(client: OkHttpClient): QueueApi {
-        return Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build()
-            .create(QueueApi::class.java)
-    }
+    fun provideQueueApi(client: OkHttpClient): QueueApi = Retrofit.Builder()
+        .baseUrl(Constants.BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
+        .build()
+        .create(QueueApi::class.java)
 
     @Provides
     @Singleton
     fun provideQueueService(queueApi: QueueApi): QueueService =
         QueueServiceImpl(queueApi = queueApi)
-
-    @Provides
-    @Singleton
-    fun provideQueueSocketService(
-        client: HttpClient, prefs: SharedPreferences
-    ): QueueSocketService = QueueSocketServiceImpl(client = client, prefs = prefs)
 }

@@ -1,13 +1,13 @@
 package com.onthewake.onthewakelive.feature_splash.presentation
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
+import com.onthewake.onthewakelive.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,8 +16,8 @@ class SplashViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
-    private val resultChannel = Channel<AuthResult>()
-    val authResults = resultChannel.receiveAsFlow()
+    private val _state = mutableStateOf(SplashScreenState())
+    val state: State<SplashScreenState> = _state
 
     init {
         authenticate()
@@ -25,9 +25,18 @@ class SplashViewModel @Inject constructor(
 
     private fun authenticate() {
         viewModelScope.launch {
-            val result = repository.authenticate()
-            delay(1000)
-            resultChannel.send(result)
+            _state.value = state.value.copy(isLoading = true)
+
+            val startDestination = when (repository.authenticate()) {
+                AuthResult.Authorized -> Screen.QueueScreen
+                AuthResult.Unauthorized -> Screen.LoginScreen
+                else -> Screen.ServerUnavailableScreen
+            }
+
+            _state.value = state.value.copy(
+                startDestination = startDestination,
+                isLoading = false
+            )
         }
     }
 }

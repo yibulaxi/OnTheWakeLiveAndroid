@@ -18,24 +18,23 @@ import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.feature_auth.domain.use_case.ValidationUseCase
+import com.onthewake.onthewakelive.feature_queue.domain.module.Line
 import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 
 @ExperimentalMaterial3Api
 @Composable
 fun AdminDialog(
     showDialog: (Boolean) -> Unit,
-    onAddClicked: (Boolean, String) -> Unit,
+    onAddClicked: (Line, String) -> Unit,
     queue: List<QueueItem>
 ) {
-    var isLeftButtonActive by remember { mutableStateOf(false) }
-    var isRightButtonActive by remember { mutableStateOf(true) }
-
+    var line by remember { mutableStateOf(Line.RIGHT) }
     var firstNameFieldState by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
 
-    val rightButtonColor = if (isRightButtonActive) MaterialTheme.colorScheme.primaryContainer
+    val rightButtonColor = if (line == Line.RIGHT) MaterialTheme.colorScheme.primaryContainer
     else MaterialTheme.colorScheme.onPrimaryContainer
-    val leftButtonColor = if (isLeftButtonActive) MaterialTheme.colorScheme.primaryContainer
+    val leftButtonColor = if (line == Line.LEFT) MaterialTheme.colorScheme.primaryContainer
     else MaterialTheme.colorScheme.onPrimaryContainer
 
     Dialog(onDismissRequest = { showDialog(false) }) {
@@ -58,16 +57,13 @@ fun AdminDialog(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Button(
-                        onClick = {
-                            isLeftButtonActive = !isLeftButtonActive
-                            isRightButtonActive = !isRightButtonActive
-                        },
+                        onClick = { line = Line.LEFT },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = leftButtonColor,
                             contentColor = rightButtonColor
                         )
                     ) {
-                        if (isLeftButtonActive) {
+                        if (line == Line.LEFT) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
@@ -79,16 +75,13 @@ fun AdminDialog(
                     }
                     Spacer(modifier = Modifier.width(20.dp))
                     Button(
-                        onClick = {
-                            isLeftButtonActive = !isLeftButtonActive
-                            isRightButtonActive = !isRightButtonActive
-                        },
+                        onClick = { line = Line.RIGHT },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = rightButtonColor,
                             contentColor = leftButtonColor
-                        ),
+                        )
                     ) {
-                        if (isRightButtonActive) {
+                        if (line == Line.RIGHT) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
@@ -111,15 +104,14 @@ fun AdminDialog(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
+                    modifier = Modifier.fillMaxWidth(), onClick = {
                         val addToQueueResult = ValidationUseCase().validateAdminAddToQueue(
                             firstName = firstNameFieldState, queue = queue
                         )
                         errorMessage = addToQueueResult.errorMessage
 
                         if (addToQueueResult.successful) {
-                            onAddClicked(isLeftButtonActive, firstNameFieldState)
+                            onAddClicked(line, firstNameFieldState)
                             showDialog(false)
                         }
                     },

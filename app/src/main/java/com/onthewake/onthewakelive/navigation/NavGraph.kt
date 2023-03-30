@@ -18,19 +18,20 @@ import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.Edi
 import com.onthewake.onthewakelive.feature_profile.presentation.profile.ProfileScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_details.QueueDetailsScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.QueueScreen
-import com.onthewake.onthewakelive.feature_splash.presentation.SplashScreen
+import com.onthewake.onthewakelive.feature_splash.presentation.ServerUnavailableScreen
 
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
+    startDestination: Screen,
     imageLoader: ImageLoader
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.SplashScreen.route
+        startDestination = startDestination.route
     ) {
-        composable(route = Screen.SplashScreen.route) {
-            SplashScreen(navController = navController)
+        composable(route = Screen.ServerUnavailableScreen.route) {
+            ServerUnavailableScreen()
         }
         composable(route = Screen.LoginScreen.route) {
             LoginScreen(navController = navController)

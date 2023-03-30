@@ -7,7 +7,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 sealed class Screen(val route: String) {
-    object SplashScreen : Screen("splash_screen")
+    object ServerUnavailableScreen : Screen("server_unavailable_screen")
     object LoginScreen : Screen("login_screen")
     object RegisterScreen : Screen("register_screen")
     object OtpScreen : Screen("otp_screen/{$REGISTER_DATA_ARGUMENT_KEY}") {

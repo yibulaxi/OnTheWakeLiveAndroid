@@ -9,62 +9,53 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
+import com.onthewake.onthewakelive.core.presentation.utils.UIText.StringResource
 import com.onthewake.onthewakelive.core.utils.Constants
-import com.onthewake.onthewakelive.core.utils.Constants.PREFS_FIRST_NAME
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
 import com.onthewake.onthewakelive.core.utils.Resource
-import com.onthewake.onthewakelive.feature_queue.domain.module.AddToQueueResult
+import com.onthewake.onthewakelive.feature_queue.data.repository.QueueSocketService
+import com.onthewake.onthewakelive.feature_queue.domain.module.Action
+import com.onthewake.onthewakelive.feature_queue.domain.module.Line
+import com.onthewake.onthewakelive.feature_queue.domain.module.QueueSocketResponse
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueService
-import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltViewModel
 class QueueViewModel @Inject constructor(
     private val queueService: QueueService,
-    private val queueSocketService: QueueSocketService,
     prefs: SharedPreferences,
+    okHttpClient: OkHttpClient
 ) : ViewModel() {
 
     private val _state = mutableStateOf(QueueState())
     val state: State<QueueState> = _state
 
-    private val _snackBarEvent = MutableSharedFlow<UIText>()
-    val snackBarEvent = _snackBarEvent.asSharedFlow()
-
     var showDialog by mutableStateOf(false)
 
-    val firstName = prefs.getString(PREFS_FIRST_NAME, null)
     val userId = prefs.getString(PREFS_USER_ID, null)
 
-    fun connectToQueue() {
-        getQueue()
+    private val queueSocketService = QueueSocketService(
+        viewModel = this, okHttpClient = okHttpClient
+    )
 
-        viewModelScope.launch {
-            when (val result = queueSocketService.initSession(firstName!!)) {
-                is Resource.Success -> observeQueue()
-                is Resource.Error -> _snackBarEvent.emit(result.message)
-            }
-        }
+    init {
+        getQueue()
     }
 
-    private fun observeQueue() {
-        queueSocketService.observeQueue()
-            .onEach { queueItem ->
-                val newList = state.value.queue
-                    .toMutableList()
-                    .apply {
-                        if (queueItem.isDeleteAction) removeIf { it.id == queueItem.queueItem.id }
-                        else add(0, queueItem.queueItem)
-                    }
-                    .sortedWith(compareByDescending { it.timestamp })
-                _state.value = state.value.copy(queue = newList)
-            }.launchIn(viewModelScope)
+    fun onMessage(queueSocketResponse: QueueSocketResponse) {
+        val newList = state.value.queue.toMutableList()
+            .apply {
+                if (queueSocketResponse.action == Action.JOIN_THE_QUEUE) {
+                    add(state.value.queue.size, queueSocketResponse.queueItem)
+                }
+                else removeIf { queueItem ->
+                    queueItem.id == queueSocketResponse.queueItem.id
+                }
+            }
+        _state.value = state.value.copy(queue = newList)
     }
 
     private fun getQueue() {
@@ -74,80 +65,65 @@ class QueueViewModel @Inject constructor(
                 is Resource.Success -> _state.value = state.value.copy(
                     queue = result.data ?: emptyList()
                 )
-                is Resource.Error -> _snackBarEvent.emit(result.message)
+                is Resource.Error -> _state.value = state.value.copy(error = result.message)
             }
             _state.value = state.value.copy(isQueueLoading = false)
         }
     }
 
-    private fun canAddToQueue(isLeftQueue: Boolean): AddToQueueResult {
-        val allQueue = state.value.queue.sortedWith(compareBy { it.timestamp })
-        val leftQueueItems = allQueue.filter { it.isLeftQueue }
-        val rightQueueItems = allQueue.filter { !it.isLeftQueue }
-
-        val isUserAlreadyInQueue = allQueue.find { it.userId == userId } != null
-        val userItemInLeftQueue = leftQueueItems.find { it.userId == userId }
-        val userItemInRightQueue = rightQueueItems.find { it.userId == userId }
-
-        val userPositionInLeftQueue = leftQueueItems.indexOf(userItemInLeftQueue)
-        val userPositionInRightQueue = rightQueueItems.indexOf(userItemInRightQueue)
-
-        return if (userId in Constants.ADMIN_IDS) AddToQueueResult(successful = true)
-        else if (!isUserAlreadyInQueue) AddToQueueResult(successful = true)
-        else if (isLeftQueue && userItemInLeftQueue != null) {
-            AddToQueueResult(error = UIText.StringResource(R.string.already_in_queue_error))
-        } else if (!isLeftQueue && userItemInRightQueue != null) {
-            AddToQueueResult(error = UIText.StringResource(R.string.already_in_queue_error))
-        } else if (isLeftQueue && userItemInRightQueue != null) {
-            if (leftQueueItems.size - userPositionInRightQueue >= 4) AddToQueueResult(successful = true)
-            else if (userPositionInRightQueue - leftQueueItems.size >= 4) AddToQueueResult(
-                successful = true
-            )
-            else AddToQueueResult(error = UIText.StringResource(R.string.interval_error))
-        } else if (!isLeftQueue && userItemInLeftQueue != null) {
-            if (rightQueueItems.size - userPositionInLeftQueue >= 4) AddToQueueResult(successful = true)
-            else if (userPositionInLeftQueue - rightQueueItems.size >= 4) AddToQueueResult(
-                successful = true
-            )
-            else AddToQueueResult(error = UIText.StringResource(R.string.interval_error))
-        } else AddToQueueResult(error = UIText.StringResource(R.string.unknown_error))
-    }
-
-    // TODO bug fix
-    fun addToQueue(isLeftQueue: Boolean, firstName: String? = null) {
-        viewModelScope.launch {
-            val canAddToQueueResult = canAddToQueue(isLeftQueue = isLeftQueue)
-            if (!canAddToQueueResult.successful) {
-                _snackBarEvent.emit(
-                    canAddToQueueResult.error ?: UIText.StringResource(R.string.unknown_error)
-                )
-                return@launch
+    fun joinTheQueue(line: Line, firstName: String? = null) {
+        canJoinTheQueue(
+            line = line,
+            onSuccess = {
+                queueSocketService.joinTheQueue(line = line, firstName = firstName)
+            },
+            onError = { errorMessage ->
+                _state.value = state.value.copy(error = errorMessage)
             }
+        )
+    }
 
-            _state.value = state.value.copy(isQueueLoading = true)
+    private fun canJoinTheQueue(
+        line: Line,
+        onSuccess: () -> Unit,
+        onError: (UIText) -> Unit
+    ) {
+        val queue = state.value.queue
+        val leftQueue = queue.filter { it.line == Line.LEFT }
+        val rightQueue = queue.filter { it.line == Line.RIGHT }
 
-            val result = queueSocketService.addToQueue(isLeftQueue, firstName)
-            if (result is Resource.Error) _snackBarEvent.emit(result.message)
+        val isUserAlreadyInQueue = queue.find { it.userId == userId } != null
+        val userItemInLeftQueue = leftQueue.find { it.userId == userId }
+        val userItemInRightQueue = rightQueue.find { it.userId == userId }
 
-            _state.value = state.value.copy(isQueueLoading = false)
+        val userPositionInLeftQueue = leftQueue.indexOf(userItemInLeftQueue)
+        val userPositionInRightQueue = rightQueue.indexOf(userItemInRightQueue)
+
+        if (userId in Constants.ADMIN_IDS) onSuccess()
+        else if (!isUserAlreadyInQueue) onSuccess()
+        else if (line == Line.LEFT && userItemInLeftQueue != null)
+            onError(StringResource(R.string.already_in_queue_error))
+        else if (line == Line.RIGHT && userItemInRightQueue != null)
+            onError(StringResource(R.string.already_in_queue_error))
+        else if (line == Line.LEFT && userItemInRightQueue != null) {
+            if (leftQueue.size - userPositionInRightQueue >= 4) onSuccess()
+            else if (userPositionInRightQueue - leftQueue.size >= 4) onSuccess()
+            else onError(StringResource(R.string.interval_error))
+        } else if (line == Line.RIGHT && userItemInLeftQueue != null) {
+            if (rightQueue.size - userPositionInLeftQueue >= 4) onSuccess()
+            else if (userPositionInLeftQueue - rightQueue.size >= 4) onSuccess()
+            else onError(StringResource(R.string.interval_error))
+        } else onError(StringResource(R.string.unknown_error))
+    }
+
+    fun leaveTheQueue(queueItemId: String) {
+        viewModelScope.launch {
+            queueSocketService.leaveTheQueue(queueItemId)
         }
     }
 
-    fun deleteQueueItem(queueItemId: String) {
-        viewModelScope.launch {
-            _state.value = state.value.copy(isQueueLoading = true)
-
-            val result = queueService.deleteQueueItem(queueItemId)
-            if (result is Resource.Error) _snackBarEvent.emit(result.message)
-
-            _state.value = state.value.copy(isQueueLoading = false)
-        }
-    }
-
-
-    fun disconnect() {
-        viewModelScope.launch {
-            queueSocketService.closeSession()
-        }
+    override fun onCleared() {
+        super.onCleared()
+        queueSocketService.closeSession()
     }
 }
