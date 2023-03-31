@@ -1,16 +1,16 @@
 package com.onthewake.onthewakelive.di
 
-import android.content.Context
 import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
 import com.google.firebase.storage.FirebaseStorage
 import com.onthewake.onthewakelive.core.utils.Constants.BASE_URL
 import com.onthewake.onthewakelive.feature_profile.data.remote.ProfileApi
 import com.onthewake.onthewakelive.feature_profile.data.repository.ProfileRepositoryImpl
+import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import com.onthewake.onthewakelive.feature_profile.domain.repository.ProfileRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -36,9 +36,9 @@ object ProfileModule {
     @Singleton
     fun provideProfileRepository(
         profileApi: ProfileApi,
-        @ApplicationContext context: Context,
         storage: FirebaseStorage,
-        prefs: SharedPreferences
-    ): ProfileRepository = ProfileRepositoryImpl(profileApi, storage, context, prefs)
+        prefs: SharedPreferences,
+        dataStore: DataStore<Profile>
+    ): ProfileRepository = ProfileRepositoryImpl(profileApi, storage, prefs, dataStore)
 
 }

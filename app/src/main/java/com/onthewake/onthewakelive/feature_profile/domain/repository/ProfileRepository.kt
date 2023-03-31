@@ -8,8 +8,6 @@ import com.onthewake.onthewakelive.feature_profile.domain.module.UpdateProfileDa
 
 interface ProfileRepository {
     suspend fun getProfile(): Resource<Profile>
-    suspend fun updateProfile(
-        updateProfileData: UpdateProfileData,
-        selectedProfilePictureUri: Uri?
-    ): SimpleResource
+    suspend fun updateProfile(updateProfileData: UpdateProfileData): SimpleResource
+    suspend fun uploadUserAvatarToFirebaseStorage(profilePictureUri: Uri?): Uri?
 }

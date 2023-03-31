@@ -2,35 +2,30 @@ package com.onthewake.onthewakelive.feature_profile.presentation.edit_profile
 
 import android.net.Uri
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.feature_auth.domain.use_case.ValidationUseCase
-import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import com.onthewake.onthewakelive.feature_profile.domain.module.UpdateProfileData
 import com.onthewake.onthewakelive.feature_profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val validationUseCase: ValidationUseCase,
-    private val profileRepository: ProfileRepository,
-    private val dataStore: DataStore<Profile>
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(EditProfileState())
+    private val _state = mutableStateOf(EditProfileState())
+    val state: State<EditProfileState> = _state
 
     private val _snackBarEvent = MutableSharedFlow<UIText>()
     val snackBarEvent = _snackBarEvent.asSharedFlow()
@@ -42,58 +37,64 @@ class EditProfileViewModel @Inject constructor(
     val selectedProfilePictureUri: State<Uri?> = _selectedProfilePictureUri
 
     init {
-        updateDataFromDataStore()
+        getProfile()
     }
 
     fun onEvent(event: EditProfileUiEvent) {
         when (event) {
             is EditProfileUiEvent.EditProfileFirstNameChanged -> {
-                state = state.copy(firstName = event.value)
+                _state.value = state.value.copy(firstName = event.value)
             }
             is EditProfileUiEvent.EditProfileLastNameChanged -> {
-                state = state.copy(lastName = event.value)
+                _state.value = state.value.copy(lastName = event.value)
             }
             is EditProfileUiEvent.EditProfilePhoneNumberChanged -> {
-                state = state.copy(phoneNumber = event.value)
+                _state.value = state.value.copy(phoneNumber = event.value)
             }
             is EditProfileUiEvent.EditProfileTelegramChanged -> {
-                state = state.copy(telegram = event.value)
+                _state.value = state.value.copy(telegram = event.value)
             }
             is EditProfileUiEvent.EditProfileInstagramChanged -> {
-                state = state.copy(instagram = event.value)
+                _state.value = state.value.copy(instagram = event.value)
             }
             is EditProfileUiEvent.EditProfileDateOfBirthChanged -> {
-                state = state.copy(dateOfBirth = event.value)
+                _state.value = state.value.copy(dateOfBirth = event.value)
             }
             is EditProfileUiEvent.CropImage -> {
                 _selectedProfilePictureUri.value = event.uri
-                state = state.copy(profilePictureUri = event.uri.toString())
+                _state.value = state.value.copy(profilePictureUri = event.uri.toString())
             }
             is EditProfileUiEvent.EditProfile -> editProfile()
         }
     }
 
-    private fun updateDataFromDataStore() {
+    private fun getProfile() {
         viewModelScope.launch {
-            dataStore.data.collectLatest { profile ->
-                state = state.copy(
-                    firstName = profile.firstName,
-                    lastName = profile.lastName,
-                    phoneNumber = profile.phoneNumber,
-                    telegram = profile.telegram,
-                    instagram = profile.instagram,
-                    dateOfBirth = profile.dateOfBirth,
-                    profilePictureUri = profile.profilePictureUri
-                )
+            _state.value = state.value.copy(isLoading = true)
+
+            when (val result = profileRepository.getProfile()) {
+                is Resource.Success -> result.data?.let { profile ->
+                    _state.value = state.value.copy(
+                        firstName = profile.firstName,
+                        lastName = profile.lastName,
+                        phoneNumber = profile.phoneNumber,
+                        instagram = profile.instagram,
+                        telegram = profile.telegram,
+                        dateOfBirth = profile.dateOfBirth,
+                        profilePictureUri = profile.profilePictureUri
+                    )
+                }
+                is Resource.Error -> _snackBarEvent.emit(result.message)
             }
+            _state.value = state.value.copy(isLoading = false)
         }
     }
 
     private fun editProfile() {
-        val firstNameResult = validationUseCase.validateFirstName(state.firstName)
-        val lastNameResult = validationUseCase.validateLastName(state.lastName)
-        val phoneNumberResult = validationUseCase.validatePhoneNumber(state.phoneNumber)
-        val dateOfBirthResult = validationUseCase.validateDateOfBirth(state.dateOfBirth)
+        val firstNameResult = validationUseCase.validateFirstName(state.value.firstName)
+        val lastNameResult = validationUseCase.validateLastName(state.value.lastName)
+        val phoneNumberResult = validationUseCase.validatePhoneNumber(state.value.phoneNumber)
+        val dateOfBirthResult = validationUseCase.validateDateOfBirth(state.value.dateOfBirth)
 
         val hasError = listOf(
             firstNameResult,
@@ -103,14 +104,14 @@ class EditProfileViewModel @Inject constructor(
         ).any { !it.successful }
 
         if (hasError) {
-            state = state.copy(
+            _state.value = state.value.copy(
                 profileFirsNameError = firstNameResult.errorMessage,
                 profileLastNameError = lastNameResult.errorMessage,
                 profilePhoneNumberError = phoneNumberResult.errorMessage,
                 profileDateOfBirthError = dateOfBirthResult.errorMessage
             )
             return
-        } else state = state.copy(
+        } else _state.value = state.value.copy(
             profileFirsNameError = null,
             profileLastNameError = null,
             profilePhoneNumberError = null,
@@ -118,22 +119,24 @@ class EditProfileViewModel @Inject constructor(
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            state = state.copy(isLoading = true)
+            _state.value = state.value.copy(isLoading = true)
 
+            val downloadUrl = profileRepository.uploadUserAvatarToFirebaseStorage(
+                profilePictureUri = selectedProfilePictureUri.value
+            )
             val result = profileRepository.updateProfile(
                 updateProfileData = UpdateProfileData(
-                    firstName = state.firstName.trim(),
-                    lastName = state.lastName.trim(),
-                    phoneNumber = state.phoneNumber.trim(),
-                    instagram = state.instagram.trim(),
-                    telegram = state.telegram.trim(),
-                    dateOfBirth = state.dateOfBirth.trim(),
-                    profilePictureUri = state.profilePictureUri
-                ),
-                selectedProfilePictureUri = selectedProfilePictureUri.value
+                    firstName = state.value.firstName.trim(),
+                    lastName = state.value.lastName.trim(),
+                    phoneNumber = state.value.phoneNumber.trim(),
+                    instagram = state.value.instagram.trim(),
+                    telegram = state.value.telegram.trim(),
+                    dateOfBirth = state.value.dateOfBirth.trim(),
+                    profilePictureUri = downloadUrl?.toString()
+                )
             )
             _selectedProfilePictureUri.value = null
-            state = state.copy(isLoading = false)
+            _state.value = state.value.copy(isLoading = false)
 
             when (result) {
                 is Resource.Success -> _snackBarEvent.emit(

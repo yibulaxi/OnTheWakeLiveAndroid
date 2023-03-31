@@ -12,7 +12,9 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,15 +30,12 @@ import androidx.navigation.NavHostController
 import coil.ImageLoader
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.FormattedDateOfBirth
-import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
+import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
-import com.onthewake.onthewakelive.core.utils.UserProfileSerializer.defaultValue
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
-import com.onthewake.onthewakelive.di.AppModule.dataStore
 import com.onthewake.onthewakelive.navigation.Screen
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -45,6 +44,8 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     imageLoader: ImageLoader
 ) {
+    val state = viewModel.state.value
+
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
@@ -53,22 +54,17 @@ fun ProfileScreen(
     val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
     SetSystemBarsColor(systemBarsColor = surfaceColor)
 
-    val dataStore by context.dataStore.data
-        .collectAsState(initial = defaultValue)
-
-    LaunchedEffect(key1 = true) {
-        viewModel.snackBarEvent.collectLatest { message ->
-            snackBarHostState.showSnackbar(message = message.asString(context))
+    LaunchedEffect(key1 = state.error) {
+        state.error?.let { error ->
+            snackBarHostState.showSnackbar(message = error.asString(context))
         }
     }
 
     LaunchedEffect(key1 = true) {
-        if (dataStore.firstName.isEmpty() || dataStore.lastName.isEmpty()) {
-            viewModel.getProfile()
-        }
+        viewModel.getProfile()
     }
 
-    AnimatedContent(targetState = viewModel.isLoading) { isLoading ->
+    AnimatedContent(targetState = state.isLoading) { isLoading ->
         if (isLoading) StandardLoadingView()
         else Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -110,7 +106,6 @@ fun ProfileScreen(
                 ) {
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .padding(top = 20.dp, bottom = 40.dp)
                     ) {
@@ -140,7 +135,7 @@ fun ProfileScreen(
                             ) {
                                 StandardImageView(
                                     imageLoader = imageLoader,
-                                    model = dataStore.profilePictureUri,
+                                    model = state.profilePictureUri,
                                     onUserAvatarClicked = { pictureUrl ->
                                         navController.navigate(
                                             Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
@@ -150,14 +145,14 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = dataStore.firstName,
+                                        text = state.firstName,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(1.dp))
                                     Text(
-                                        text = dataStore.lastName,
+                                        text = state.lastName,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -174,12 +169,12 @@ fun ProfileScreen(
                     ) {
                         UserDataItem(
                             title = stringResource(id = R.string.instagram),
-                            subtitle = dataStore.instagram
+                            subtitle = state.instagram
                         )
-                        if (dataStore.instagram.isNotEmpty()) IconButton(
+                        if (state.instagram.isNotEmpty()) IconButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                context.openInstagramProfile(dataStore.instagram)
+                                context.openInstagramProfile(state.instagram)
                             }
                         ) {
                             Icon(
@@ -190,13 +185,13 @@ fun ProfileScreen(
                     }
                     UserDataItem(
                         title = stringResource(id = R.string.telegram),
-                        subtitle = dataStore.telegram
+                        subtitle = state.telegram
                     )
                     UserDataItem(
                         title = stringResource(id = R.string.phone_number),
-                        subtitle = dataStore.phoneNumber
+                        subtitle = state.phoneNumber
                     )
-                    FormattedDateOfBirth(dataStore.dateOfBirth)
+                    FormattedDateOfBirth(state.dateOfBirth)
                 }
             }
         }

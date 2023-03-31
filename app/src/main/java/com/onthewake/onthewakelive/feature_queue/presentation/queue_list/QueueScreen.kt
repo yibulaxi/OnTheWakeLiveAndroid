@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_list
 
 import android.Manifest
@@ -43,9 +45,7 @@ import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.compone
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.launch
 
-@OptIn(
-    ExperimentalPagerApi::class, ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class
-)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun QueueScreen(
     viewModel: QueueViewModel = hiltViewModel(),
@@ -208,7 +208,6 @@ fun QueueScreen(
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun QueueLeftContent(
     state: QueueState,
@@ -242,7 +241,6 @@ fun QueueLeftContent(
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun QueueRightContent(
     state: QueueState,

@@ -86,6 +86,7 @@ class RegisterViewModel @Inject constructor(
             val isUserAlreadyExists = repository.isUserAlreadyExists(phoneNumber)
             if (isUserAlreadyExists.data == true) {
                 _authResult.emit(AuthResult.UserAlreadyExist)
+                _state.value = state.value.copy(isLoading = false)
                 return@launch
             }
 
