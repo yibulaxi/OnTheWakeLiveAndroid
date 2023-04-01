@@ -94,28 +94,24 @@ class EditProfileViewModel @Inject constructor(
         val firstNameResult = validationUseCase.validateFirstName(state.value.firstName)
         val lastNameResult = validationUseCase.validateLastName(state.value.lastName)
         val phoneNumberResult = validationUseCase.validatePhoneNumber(state.value.phoneNumber)
-        val dateOfBirthResult = validationUseCase.validateDateOfBirth(state.value.dateOfBirth)
 
         val hasError = listOf(
             firstNameResult,
             lastNameResult,
-            phoneNumberResult,
-            dateOfBirthResult
+            phoneNumberResult
         ).any { !it.successful }
 
         if (hasError) {
             _state.value = state.value.copy(
                 profileFirsNameError = firstNameResult.errorMessage,
                 profileLastNameError = lastNameResult.errorMessage,
-                profilePhoneNumberError = phoneNumberResult.errorMessage,
-                profileDateOfBirthError = dateOfBirthResult.errorMessage
+                profilePhoneNumberError = phoneNumberResult.errorMessage
             )
             return
         } else _state.value = state.value.copy(
             profileFirsNameError = null,
             profileLastNameError = null,
-            profilePhoneNumberError = null,
-            profileDateOfBirthError = null
+            profilePhoneNumberError = null
         )
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -131,7 +127,7 @@ class EditProfileViewModel @Inject constructor(
                     phoneNumber = state.value.phoneNumber.trim(),
                     instagram = state.value.instagram.trim(),
                     telegram = state.value.telegram.trim(),
-                    dateOfBirth = state.value.dateOfBirth.trim(),
+                    dateOfBirth = state.value.dateOfBirth,
                     profilePictureUri = downloadUrl?.toString()
                 )
             )

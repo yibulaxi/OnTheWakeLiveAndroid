@@ -9,7 +9,6 @@ object Constants {
     const val SHARED_PREFS = "shared_preferences"
     const val PREFS_JWT_TOKEN = "jwt_token"
     const val PREFS_USER_ID = "user_id"
-    const val PREFS_FIRST_NAME = "first_name"
 
     const val ONESIGNAL_APP_ID = "8890bfbd-a1d0-426a-98ae-88aa5b954b68"
 

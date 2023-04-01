@@ -5,13 +5,10 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
@@ -30,13 +27,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.calendar.CalendarDialog
+import com.maxkeppeler.sheets.calendar.models.CalendarConfig
+import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
@@ -44,6 +43,7 @@ import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.CropActivityResultContract
 import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.*
 import kotlinx.coroutines.flow.collectLatest
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +85,20 @@ fun EditProfileScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { if (it != null) cropActivityLauncher.launch(it) }
+
+    val calendarState = rememberUseCaseState()
+    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+
+    CalendarDialog(
+        state = calendarState,
+        config = CalendarConfig(
+            monthSelection = true,
+            yearSelection = true
+        ),
+        selection = CalendarSelection.Date { date ->
+            viewModel.onEvent(EditProfileDateOfBirthChanged(date.format(formatter)))
+        }
+    )
 
     AnimatedContent(targetState = state.isLoading) { isLoading ->
 
@@ -207,27 +221,19 @@ fun EditProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { calendarState.show() },
                     value = state.dateOfBirth,
-                    onValueChange = {
-                        if (it.length <= 8) viewModel.onEvent(EditProfileDateOfBirthChanged(it))
-                    },
-                    label = {
-                        Text(text = stringResource(id = R.string.date_of_birth_placeholder))
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
+                    onValueChange = {},
+                    label = { Text(text = stringResource(id = R.string.date_of_birth)) },
+                    enabled = false,
+                    colors = TextFieldDefaults.textFieldColors(
+                        disabledIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
-                state.profileDateOfBirthError?.let { error ->
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = error.asString(),
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.End
-                    )
-                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     modifier = Modifier.align(Alignment.End),

@@ -56,7 +56,6 @@ class ProfileRepositoryImpl(
             oldProfileData.telegram == newProfileData.telegram &&
             oldProfileData.dateOfBirth == newProfileData.dateOfBirth)
 
-
     override suspend fun updateProfile(updateProfileData: UpdateProfileData): SimpleResource {
         return try {
             val oldProfileData = dataStore.data.first()
@@ -76,17 +75,15 @@ class ProfileRepositoryImpl(
             )
             dataStore.updateData {
                 it.copy(
-                    firstName = updateProfileData.firstName.trim(),
-                    lastName = updateProfileData.lastName.trim(),
-                    phoneNumber = updateProfileData.phoneNumber.trim(),
-                    instagram = updateProfileData.instagram.trim(),
-                    telegram = updateProfileData.telegram.trim(),
-                    dateOfBirth = updateProfileData.dateOfBirth.trim(),
+                    firstName = updateProfileData.firstName,
+                    lastName = updateProfileData.lastName,
+                    phoneNumber = updateProfileData.phoneNumber,
+                    instagram = updateProfileData.instagram,
+                    telegram = updateProfileData.telegram,
+                    dateOfBirth = updateProfileData.dateOfBirth,
                     profilePictureUri = profilePictureUri
                 )
             }
-            prefs.put(Constants.PREFS_FIRST_NAME, updateProfileData.firstName.trim())
-
             Resource.Success(Unit)
         } catch (exception: Exception) {
             Resource.Error(handleNetworkError(exception))

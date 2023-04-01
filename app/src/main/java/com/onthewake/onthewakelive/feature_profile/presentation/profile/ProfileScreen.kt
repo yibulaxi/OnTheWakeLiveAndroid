@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -29,7 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.components.FormattedDateOfBirth
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
@@ -70,9 +68,7 @@ fun ProfileScreen(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
             topBar = {
                 TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = R.string.profile))
-                    },
+                    title = { Text(text = stringResource(id = R.string.profile)) },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor),
                     actions = {
                         IconButton(
@@ -101,67 +97,59 @@ fun ProfileScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = surfaceColor),
-                    contentAlignment = Alignment.CenterStart
+                        .background(color = surfaceColor)
                 ) {
-                    Card(
+                    Row(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 20.dp, bottom = 40.dp)
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .padding(horizontal = 16.dp, vertical = 22.dp)
+                            .clip(shape = MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            IconButton(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(end = 4.dp, top = 2.dp),
-                                onClick = {
-                                    haptic.performHapticFeedback(
-                                        HapticFeedbackType.TextHandleMove
-                                    )
-                                    navController.navigate(Screen.EditProfileScreen.route)
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = stringResource(id = R.string.edit_icon)
+                        StandardImageView(
+                            imageLoader = imageLoader,
+                            model = state.profilePictureUri,
+                            onUserAvatarClicked = { pictureUrl ->
+                                navController.navigate(
+                                    Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
                                 )
                             }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                StandardImageView(
-                                    imageLoader = imageLoader,
-                                    model = state.profilePictureUri,
-                                    onUserAvatarClicked = { pictureUrl ->
-                                        navController.navigate(
-                                            Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
-                                        )
-                                    }
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = state.firstName,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(1.dp))
-                                    Text(
-                                        text = state.lastName,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .weight(1f)
+                        ) {
+                            Text(
+                                text = state.firstName,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(1.dp))
+                            Text(
+                                text = state.lastName,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        IconButton(
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                navController.navigate(Screen.EditProfileScreen.route)
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(id = R.string.edit_icon)
+                            )
                         }
                     }
                 }
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    Spacer(modifier = Modifier.height(18.dp))
+                Column(modifier = Modifier.padding(all = 16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -169,7 +157,8 @@ fun ProfileScreen(
                     ) {
                         UserDataItem(
                             title = stringResource(id = R.string.instagram),
-                            subtitle = state.instagram
+                            subtitle = state.instagram,
+                            showDivider = false
                         )
                         if (state.instagram.isNotEmpty()) IconButton(
                             onClick = {
@@ -179,10 +168,11 @@ fun ProfileScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
-                                contentDescription = stringResource(id = R.string.right_arrow)
+                                contentDescription = stringResource(id = R.string.arrow_forward)
                             )
                         }
                     }
+                    Divider(modifier = Modifier.padding(vertical = 16.dp))
                     UserDataItem(
                         title = stringResource(id = R.string.telegram),
                         subtitle = state.telegram
@@ -191,7 +181,11 @@ fun ProfileScreen(
                         title = stringResource(id = R.string.phone_number),
                         subtitle = state.phoneNumber
                     )
-                    FormattedDateOfBirth(state.dateOfBirth)
+                    UserDataItem(
+                        title = stringResource(id = R.string.date_of_birth),
+                        subtitle = state.dateOfBirth,
+                        showDivider = false
+                    )
                 }
             }
         }

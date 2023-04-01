@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -24,10 +25,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.components.FormattedDateOfBirth
-import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
+import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.navigation.Screen
@@ -85,44 +85,39 @@ fun QueueDetailsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = surfaceColor),
-                    contentAlignment = Alignment.CenterStart
+                        .background(color = surfaceColor)
                 ) {
-                    Card(
+                    Row(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 20.dp, bottom = 40.dp),
-                        shape = MaterialTheme.shapes.medium
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .padding(horizontal = 16.dp, vertical = 22.dp)
+                            .clip(shape = MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            StandardImageView(
-                                imageLoader = imageLoader,
-                                model = state.profilePictureUri,
-                                onUserAvatarClicked = { pictureUrl ->
-                                    navController.navigate(
-                                        Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
-                                    )
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = state.firstName,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(1.dp))
-                                Text(
-                                    text = state.lastName,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        StandardImageView(
+                            imageLoader = imageLoader,
+                            model = state.profilePictureUri,
+                            onUserAvatarClicked = { pictureUrl ->
+                                navController.navigate(
+                                    Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
                                 )
                             }
+                        )
+                        Column(modifier = Modifier.padding(start = 12.dp)) {
+                            Text(
+                                text = state.firstName,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(1.dp))
+                            Text(
+                                text = state.lastName,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -145,7 +140,7 @@ fun QueueDetailsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
-                                contentDescription = stringResource(id = R.string.right_arrow)
+                                contentDescription = stringResource(id = R.string.arrow_forward)
                             )
                         }
                     }
@@ -157,7 +152,11 @@ fun QueueDetailsScreen(
                         title = stringResource(id = R.string.phone_number),
                         subtitle = state.phoneNumber
                     )
-                    FormattedDateOfBirth(state.dateOfBirth)
+                    UserDataItem(
+                        title = stringResource(id = R.string.date_of_birth),
+                        subtitle = state.dateOfBirth,
+                        showDivider = false
+                    )
                 }
             }
         }

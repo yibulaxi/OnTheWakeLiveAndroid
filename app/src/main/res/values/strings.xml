@@ -66,12 +66,10 @@
     <string name="already_in_queue_error">Oops! You are already in queue!</string>
     <string name="interval_error">Oops! You need at least 4 people in front of you!</string>
 
-    <string name="logo" translatable="false">OnTheWakeLogo</string>
-
     <string name="profile">Profile</string>
     <string name="edit_icon">Edit Icon</string>
     <string name="not_specified">Not specified</string>
-    <string name="right_arrow">Right arrow</string>
+    <string name="arrow_forward">Arrow forward</string>
 
     <string name="details">Details</string>
     <string name="arrow_back">Arrow Back</string>
@@ -81,7 +79,6 @@
     <string name="person_icon">Person Icon</string>
 
     <string name="edit_profile">Edit Profile</string>
-    <string name="date_of_birth_placeholder">Date of Birth (dd/mm/yyyy)</string>
     <string name="nothing_to_update">Nothing to update</string>
     <string name="edit">Edit</string>
 

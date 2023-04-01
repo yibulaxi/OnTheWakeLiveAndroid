@@ -13,6 +13,5 @@ data class EditProfileState(
     val telegram: String = "",
     val instagram: String = "",
     val profilePictureUri: String = "",
-    val dateOfBirth: String = "",
-    val profileDateOfBirthError: UIText? = null
+    val dateOfBirth: String = ""
 )

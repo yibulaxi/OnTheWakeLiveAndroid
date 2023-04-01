@@ -23,10 +23,11 @@ fun QueueItemContent(
     queueItem: QueueItem,
     imageLoader: ImageLoader,
     onDetailsClicked: (String) -> Unit,
-    onUserAvatarClicked: (String) -> Unit
+    onUserAvatarClicked: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onDetailsClicked(queueItem.id) }
             .clip(shape = MaterialTheme.shapes.medium)

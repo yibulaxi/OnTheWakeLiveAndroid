@@ -15,7 +15,11 @@ import androidx.compose.ui.unit.sp
 import com.onthewake.onthewakelive.R
 
 @Composable
-fun UserDataItem(title: String, subtitle: String) {
+fun UserDataItem(
+    title: String,
+    subtitle: String,
+    showDivider: Boolean = true
+) {
     Column {
         Text(
             text = title,
@@ -24,6 +28,6 @@ fun UserDataItem(title: String, subtitle: String) {
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = subtitle.ifEmpty { stringResource(id = R.string.not_specified) })
-        Divider(modifier = Modifier.padding(vertical = 18.dp))
+        if (showDivider) Divider(modifier = Modifier.padding(vertical = 16.dp))
     }
 }

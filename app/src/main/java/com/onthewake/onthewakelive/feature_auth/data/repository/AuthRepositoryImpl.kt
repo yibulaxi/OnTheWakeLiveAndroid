@@ -7,7 +7,6 @@ import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
 import com.onesignal.OneSignal
-import com.onthewake.onthewakelive.core.utils.Constants.PREFS_FIRST_NAME
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_JWT_TOKEN
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
 import com.onthewake.onthewakelive.core.utils.Resource
@@ -40,7 +39,6 @@ class AuthRepositoryImpl(
 
         sharedPreferences.put(PREFS_JWT_TOKEN, response.token)
         sharedPreferences.put(PREFS_USER_ID, response.userId)
-        sharedPreferences.put(PREFS_FIRST_NAME, response.firstName)
 
         OneSignal.setExternalUserId(response.userId)
 
