@@ -42,12 +42,10 @@ fun StandardImageView(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (!isLoading && model.isEmpty()) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = stringResource(id = R.string.person_icon)
-                    )
-                }
+                if (!isLoading && model.isEmpty()) Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = stringResource(id = R.string.person_icon)
+                )
                 if (isLoading) CircularProgressIndicator(
                     modifier = Modifier.size(26.dp),
                     strokeWidth = 2.dp

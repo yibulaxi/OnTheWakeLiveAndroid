@@ -10,7 +10,6 @@ import com.onthewake.onthewakelive.core.utils.Constants.REGISTER_DATA_ARGUMENT_K
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.CreateAccountRequest
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
-import com.onthewake.onthewakelive.feature_auth.domain.use_case.ValidationUseCase
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class OtpViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val validationUseCase: ValidationUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -48,27 +46,11 @@ class OtpViewModel @Inject constructor(
     fun onEvent(event: OtpEvent) {
         when (event) {
             is OtpEvent.OtpChanged -> _state.value = state.value.copy(otp = event.value)
-            is OtpEvent.SignUp -> signUp(createAccountRequest = event.createAccountRequest)
+            is OtpEvent.VerifyOtpAndSignUp -> verifyOtpAndSignUp()
         }
     }
 
-    private fun signUp(createAccountRequest: CreateAccountRequest) {
-        viewModelScope.launch {
-            val signUpResult = repository.signUp(createAccountRequest)
-            _state.value = state.value.copy(signUpResult = signUpResult)
-        }
-    }
-
-
-    fun verifyOtpAndSignUp() {
-
-        val otpValidationResult = validationUseCase.validateOtp(state.value.otp)
-
-        if (!otpValidationResult.successful) {
-            _state.value = state.value.copy(otpError = otpValidationResult.errorMessage)
-            return
-        }
-
+    private fun verifyOtpAndSignUp() {
         viewModelScope.launch {
             _state.value = state.value.copy(isLoading = true)
 
@@ -76,18 +58,19 @@ class OtpViewModel @Inject constructor(
 
             if (otpResult == AuthResult.IncorrectOtp) {
                 _authResult.emit(AuthResult.IncorrectOtp)
-            } else {
-                val signUpResult = repository.signUp(
-                    CreateAccountRequest(
-                        firstName = state.value.signUpFirstName,
-                        lastName = state.value.signUpLastName,
-                        phoneNumber = state.value.signUpPhoneNumber,
-                        password = state.value.signUpPassword
-                    )
-                )
-                _authResult.emit(signUpResult)
+                _state.value = state.value.copy(isLoading = false)
+                return@launch
             }
 
+            val signUpResult = repository.signUp(
+                CreateAccountRequest(
+                    firstName = state.value.signUpFirstName,
+                    lastName = state.value.signUpLastName,
+                    phoneNumber = state.value.signUpPhoneNumber,
+                    password = state.value.signUpPassword
+                )
+            )
+            _authResult.emit(signUpResult)
             _state.value = state.value.copy(isLoading = false)
         }
     }

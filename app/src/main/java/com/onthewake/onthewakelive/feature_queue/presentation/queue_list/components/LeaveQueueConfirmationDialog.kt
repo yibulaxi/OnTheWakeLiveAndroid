@@ -15,9 +15,7 @@ fun LeaveQueueConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = { showDialog(false) },
-        title = {
-            Text(text = stringResource(R.string.confirm_action))
-        },
+        title = { Text(text = stringResource(R.string.confirm_action)) },
         text = {
             Text(
                 text = if (isUserAdmin) stringResource(R.string.admin_remove_person_confirmation_text)

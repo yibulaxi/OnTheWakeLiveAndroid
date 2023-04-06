@@ -1,16 +1,16 @@
 package com.onthewake.onthewakelive.di
 
-import android.content.Context
 import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
 import com.google.firebase.auth.FirebaseAuth
 import com.onthewake.onthewakelive.core.utils.Constants.BASE_URL
 import com.onthewake.onthewakelive.feature_auth.data.remote.AuthApi
 import com.onthewake.onthewakelive.feature_auth.data.repository.AuthRepositoryImpl
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
+import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.*
 import okhttp3.OkHttpClient
@@ -35,13 +35,13 @@ object AuthModule {
     @Singleton
     fun provideAuthRepository(
         api: AuthApi,
-        @ApplicationContext context: Context,
         firebaseAuth: FirebaseAuth,
+        dataStore: DataStore<Profile>,
         sharedPreferences: SharedPreferences
     ): AuthRepository = AuthRepositoryImpl(
         api = api,
-        context = context,
         firebaseAuth = firebaseAuth,
+        dataStore = dataStore,
         sharedPreferences = sharedPreferences
     )
 }

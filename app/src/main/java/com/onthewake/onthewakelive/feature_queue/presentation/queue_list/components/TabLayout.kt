@@ -21,10 +21,10 @@ import kotlinx.coroutines.launch
 @ExperimentalPagerApi
 @Composable
 fun TabLayout(pagerState: PagerState) {
-
-    val haptic = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+
+    val scope = rememberCoroutineScope()
 
     val list = listOf(
         context.getString(R.string.left_line) to Icons.Default.ArrowBack,
@@ -36,7 +36,7 @@ fun TabLayout(pagerState: PagerState) {
         contentColor = Color.White,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
-                Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
                 height = 2.dp,
                 color = MaterialTheme.colorScheme.secondaryContainer
             )

@@ -1,7 +1,5 @@
 package com.onthewake.onthewakelive.feature_profile.presentation.profile
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -28,14 +26,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import com.onthewake.onthewakelive.R
+import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
-import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
@@ -62,131 +60,129 @@ fun ProfileScreen(
         viewModel.getProfile()
     }
 
-    AnimatedContent(targetState = state.isLoading) { isLoading ->
-        if (isLoading) StandardLoadingView()
-        else Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-            topBar = {
-                TopAppBar(
-                    title = { Text(text = stringResource(id = R.string.profile)) },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor),
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                navController.navigate(Screen.LoginScreen.route) {
-                                    popUpTo(Screen.QueueScreen.route) { inclusive = true }
-                                    viewModel.logout()
-                                }
+    AnimatedScaffold(
+        isLoading = state.isLoading,
+        snackBarHost = { SnackbarHost(hostState = snackBarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(id = R.string.profile)) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor),
+                actions = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.LoginScreen.route) {
+                                popUpTo(Screen.QueueScreen.route) { inclusive = true }
+                                viewModel.logout()
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Logout,
-                                contentDescription = stringResource(id = R.string.arrow_back)
-                            )
                         }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = stringResource(id = R.string.arrow_back)
+                        )
                     }
-                )
-            }
-        ) { paddingValues ->
-            Column(
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
+                    .fillMaxWidth()
+                    .background(color = surfaceColor)
             ) {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = surfaceColor)
+                        .height(120.dp)
+                        .padding(horizontal = 16.dp, vertical = 22.dp)
+                        .clip(shape = MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
+                    StandardImageView(
+                        imageLoader = imageLoader,
+                        model = state.profilePictureUri,
+                        onUserAvatarClicked = { pictureUrl ->
+                            navController.navigate(
+                                Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
+                            )
+                        }
+                    )
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .padding(horizontal = 16.dp, vertical = 22.dp)
-                            .clip(shape = MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(start = 12.dp)
+                            .weight(1f)
                     ) {
-                        StandardImageView(
-                            imageLoader = imageLoader,
-                            model = state.profilePictureUri,
-                            onUserAvatarClicked = { pictureUrl ->
-                                navController.navigate(
-                                    Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
-                                )
-                            }
+                        Text(
+                            text = state.firstName,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .weight(1f)
-                        ) {
-                            Text(
-                                text = state.firstName,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(1.dp))
-                            Text(
-                                text = state.lastName,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Spacer(modifier = Modifier.height(1.dp))
+                        Text(
+                            text = state.lastName,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.padding(bottom = 12.dp),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            navController.navigate(Screen.EditProfileScreen.route)
                         }
-                        IconButton(
-                            modifier = Modifier.padding(bottom = 12.dp),
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                navController.navigate(Screen.EditProfileScreen.route)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(id = R.string.edit_icon)
-                            )
-                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(id = R.string.edit_icon)
+                        )
                     }
                 }
-                Column(modifier = Modifier.padding(all = 16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        UserDataItem(
-                            title = stringResource(id = R.string.instagram),
-                            subtitle = state.instagram,
-                            showDivider = false
-                        )
-                        if (state.instagram.isNotEmpty()) IconButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                context.openInstagramProfile(state.instagram)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowForward,
-                                contentDescription = stringResource(id = R.string.arrow_forward)
-                            )
-                        }
-                    }
-                    Divider(modifier = Modifier.padding(vertical = 16.dp))
+            }
+            Column(modifier = Modifier.padding(all = 16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     UserDataItem(
-                        title = stringResource(id = R.string.telegram),
-                        subtitle = state.telegram
-                    )
-                    UserDataItem(
-                        title = stringResource(id = R.string.phone_number),
-                        subtitle = state.phoneNumber
-                    )
-                    UserDataItem(
-                        title = stringResource(id = R.string.date_of_birth),
-                        subtitle = state.dateOfBirth,
+                        title = stringResource(id = R.string.instagram),
+                        subtitle = state.instagram,
                         showDivider = false
                     )
+                    if (state.instagram.isNotEmpty()) IconButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            context.openInstagramProfile(state.instagram)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = stringResource(id = R.string.arrow_forward)
+                        )
+                    }
                 }
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
+                UserDataItem(
+                    title = stringResource(id = R.string.telegram),
+                    subtitle = state.telegram
+                )
+                UserDataItem(
+                    title = stringResource(id = R.string.phone_number),
+                    subtitle = state.phoneNumber
+                )
+                UserDataItem(
+                    title = stringResource(id = R.string.date_of_birth),
+                    subtitle = state.dateOfBirth,
+                    showDivider = false
+                )
             }
         }
     }

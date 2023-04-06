@@ -3,8 +3,6 @@ package com.onthewake.onthewakelive.feature_profile.presentation.edit_profile
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,7 +35,7 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
+import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.CropActivityResultContract
@@ -45,7 +43,7 @@ import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.Edi
 import kotlinx.coroutines.flow.collectLatest
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
@@ -91,162 +89,154 @@ fun EditProfileScreen(
 
     CalendarDialog(
         state = calendarState,
-        config = CalendarConfig(
-            monthSelection = true,
-            yearSelection = true
-        ),
+        config = CalendarConfig(monthSelection = true, yearSelection = true),
         selection = CalendarSelection.Date { date ->
             viewModel.onEvent(EditProfileDateOfBirthChanged(date.format(formatter)))
         }
     )
 
-    AnimatedContent(targetState = state.isLoading) { isLoading ->
-
-        if (isLoading) StandardLoadingView()
-        else Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = { Text(text = stringResource(id = R.string.edit_profile)) },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = surfaceColor
-                    ),
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.arrow_back)
-                            )
-                        }
+    AnimatedScaffold(
+        isLoading = state.isLoading,
+        snackBarHost = { SnackbarHost(hostState = snackBarHostState) },
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(text = stringResource(id = R.string.edit_profile)) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = surfaceColor
+                ),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = stringResource(id = R.string.arrow_back)
+                        )
                     }
-                )
-            }
-        ) { paddingValues ->
+                }
+            )
+        }
+    ) { paddingValues ->
 
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .background(backgroundColor)
+                .padding(horizontal = 24.dp)
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .background(backgroundColor)
-                    .padding(horizontal = 24.dp)
-                    .padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(top = 30.dp)
+                    .size(140.dp),
+                shape = RoundedCornerShape(40.dp),
+                onClick = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                colors = CardDefaults.cardColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             ) {
-                Card(
-                    modifier = Modifier
-                        .padding(top = 30.dp)
-                        .size(140.dp),
-                    shape = RoundedCornerShape(40.dp),
-                    onClick = {
-                        galleryLauncher.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
-                        )
-                    },
-                    colors = CardDefaults.cardColors(
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
+                    if (!isImageLoading.value) Icon(
+                        modifier = Modifier.size(30.dp),
+                        imageVector = Icons.Default.Person,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        contentDescription = stringResource(id = R.string.person_icon)
+                    )
+                    if (isImageLoading.value) CircularProgressIndicator(
+                        modifier = Modifier.size(42.dp)
+                    )
+                    Image(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (!isImageLoading.value) Icon(
-                            modifier = Modifier.size(30.dp),
-                            imageVector = Icons.Default.Person,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            contentDescription = stringResource(id = R.string.person_icon)
-                        )
-                        if (isImageLoading.value) CircularProgressIndicator(
-                            modifier = Modifier.size(42.dp)
-                        )
-                        Image(
-                            modifier = Modifier.fillMaxSize(),
-                            painter = rememberAsyncImagePainter(
-                                model = profilePictureUri ?: state.profilePictureUri,
-                                imageLoader = imageLoader,
-                                onLoading = { isImageLoading.value = true },
-                                onError = { isImageLoading.value = false },
-                                onSuccess = { isImageLoading.value = false }
-                            ),
-                            contentDescription = stringResource(id = R.string.user_picture)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(30.dp))
-                StandardTextField(
-                    value = state.firstName,
-                    onValueChange = { viewModel.onEvent(EditProfileFirstNameChanged(it)) },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
-                    ),
-                    label = stringResource(id = R.string.first_name),
-                    errorText = state.profileFirsNameError
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.lastName,
-                    onValueChange = { viewModel.onEvent(EditProfileLastNameChanged(it)) },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
-                    ),
-                    label = stringResource(id = R.string.last_name),
-                    errorText = state.profileLastNameError
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.phoneNumber,
-                    onValueChange = { viewModel.onEvent(EditProfilePhoneNumberChanged(it)) },
-                    label = stringResource(id = R.string.phone_number),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    ),
-                    errorText = state.profilePhoneNumberError
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.telegram,
-                    onValueChange = { viewModel.onEvent(EditProfileTelegramChanged(it)) },
-                    label = stringResource(id = R.string.telegram)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.instagram,
-                    onValueChange = { viewModel.onEvent(EditProfileInstagramChanged(it)) },
-                    label = stringResource(id = R.string.instagram)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { calendarState.show() },
-                    value = state.dateOfBirth,
-                    onValueChange = {},
-                    label = { Text(text = stringResource(id = R.string.date_of_birth)) },
-                    enabled = false,
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface
+                        painter = rememberAsyncImagePainter(
+                            model = profilePictureUri ?: state.profilePictureUri,
+                            imageLoader = imageLoader,
+                            onLoading = { isImageLoading.value = true },
+                            onError = { isImageLoading.value = false },
+                            onSuccess = { isImageLoading.value = false }
+                        ),
+                        contentDescription = stringResource(id = R.string.user_picture)
                     )
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    modifier = Modifier.align(Alignment.End),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onEvent(EditProfile)
-                        focusManager.clearFocus()
-                    }
-                ) {
-                    Text(text = stringResource(id = R.string.edit))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
+            Spacer(modifier = Modifier.height(30.dp))
+            StandardTextField(
+                value = state.firstName,
+                onValueChange = { viewModel.onEvent(EditProfileFirstNameChanged(it)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                label = stringResource(id = R.string.first_name),
+                errorText = state.profileFirsNameError
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.lastName,
+                onValueChange = { viewModel.onEvent(EditProfileLastNameChanged(it)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                label = stringResource(id = R.string.last_name),
+                errorText = state.profileLastNameError
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.phoneNumber,
+                onValueChange = { viewModel.onEvent(EditProfilePhoneNumberChanged(it)) },
+                label = stringResource(id = R.string.phone_number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                errorText = state.profilePhoneNumberError
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.telegram,
+                onValueChange = { viewModel.onEvent(EditProfileTelegramChanged(it)) },
+                label = stringResource(id = R.string.telegram)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.instagram,
+                onValueChange = { viewModel.onEvent(EditProfileInstagramChanged(it)) },
+                label = stringResource(id = R.string.instagram)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { calendarState.show() },
+                value = state.dateOfBirth,
+                onValueChange = {},
+                label = { Text(text = stringResource(id = R.string.date_of_birth)) },
+                enabled = false,
+                colors = TextFieldDefaults.textFieldColors(
+                    disabledIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                modifier = Modifier.align(Alignment.End),
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    viewModel.onEvent(EditProfile)
+                    focusManager.clearFocus()
+                }
+            ) {
+                Text(text = stringResource(id = R.string.edit))
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

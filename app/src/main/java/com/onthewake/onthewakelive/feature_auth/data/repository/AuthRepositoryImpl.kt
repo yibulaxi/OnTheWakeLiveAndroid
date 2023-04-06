@@ -3,6 +3,7 @@ package com.onthewake.onthewakelive.feature_auth.data.repository
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
@@ -13,12 +14,12 @@ import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.core.utils.UserProfileSerializer
 import com.onthewake.onthewakelive.core.utils.handleNetworkError
 import com.onthewake.onthewakelive.core.utils.put
-import com.onthewake.onthewakelive.di.AppModule.dataStore
 import com.onthewake.onthewakelive.feature_auth.data.remote.AuthApi
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.AuthRequest
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.CreateAccountRequest
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
+import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import retrofit2.HttpException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -26,11 +27,10 @@ import kotlin.coroutines.suspendCoroutine
 
 class AuthRepositoryImpl(
     private val api: AuthApi,
-    private val context: Context,
+    private val dataStore: DataStore<Profile>,
     private val firebaseAuth: FirebaseAuth,
     private val sharedPreferences: SharedPreferences
 ) : AuthRepository {
-
     private lateinit var storedVerificationId: String
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
 
@@ -53,12 +53,10 @@ class AuthRepositoryImpl(
         AuthResult.UnknownError
     }
 
-    override suspend fun signUp(
-        accountRequest: CreateAccountRequest
-    ): AuthResult = try {
+    override suspend fun signUp(accountRequest: CreateAccountRequest): AuthResult = try {
         api.signUp(request = accountRequest)
 
-        context.dataStore.updateData { profile ->
+        dataStore.updateData { profile ->
             profile.copy(
                 firstName = accountRequest.firstName,
                 lastName = accountRequest.lastName,
@@ -92,56 +90,54 @@ class AuthRepositoryImpl(
         phoneNumber: String,
         isResendAction: Boolean,
         context: Context
-    ): AuthResult {
-        return suspendCoroutine { continuation ->
-            try {
-                val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+    ): AuthResult = suspendCoroutine { continuation ->
+        try {
+            val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
-                    override fun onVerificationCompleted(credential: PhoneAuthCredential) {}
+                override fun onVerificationCompleted(credential: PhoneAuthCredential) {}
 
-                    override fun onVerificationFailed(exception: FirebaseException) {
-                        if (exception is FirebaseAuthInvalidCredentialsException) {
-                            continuation.resume(AuthResult.OtpInvalidCredentials)
-                        } else if (exception is FirebaseTooManyRequestsException) {
-                            continuation.resume(AuthResult.OtpTooManyRequests)
-                        }
-                    }
-
-                    override fun onCodeSent(
-                        verificationId: String,
-                        token: PhoneAuthProvider.ForceResendingToken
-                    ) {
-                        super.onCodeSent(verificationId, token)
-
-                        storedVerificationId = verificationId
-                        resendToken = token
-
-                        continuation.resume(AuthResult.OtpSentSuccess)
+                override fun onVerificationFailed(exception: FirebaseException) {
+                    if (exception is FirebaseAuthInvalidCredentialsException) {
+                        continuation.resume(AuthResult.OtpInvalidCredentials)
+                    } else if (exception is FirebaseTooManyRequestsException) {
+                        continuation.resume(AuthResult.OtpTooManyRequests)
                     }
                 }
 
-                if (isResendAction) {
-                    val options = PhoneAuthOptions.newBuilder(firebaseAuth)
-                        .setPhoneNumber(phoneNumber)
-                        .setTimeout(55L, TimeUnit.SECONDS)
-                        .setActivity(context as Activity)
-                        .setCallbacks(callbacks)
-                        .setForceResendingToken(resendToken)
-                        .build()
-                    PhoneAuthProvider.verifyPhoneNumber(options)
-                } else {
-                    val options = PhoneAuthOptions.newBuilder(firebaseAuth)
-                        .setPhoneNumber(phoneNumber)
-                        .setTimeout(55L, TimeUnit.SECONDS)
-                        .setActivity(context as Activity)
-                        .setCallbacks(callbacks)
-                        .build()
-                    PhoneAuthProvider.verifyPhoneNumber(options)
+                override fun onCodeSent(
+                    verificationId: String,
+                    token: PhoneAuthProvider.ForceResendingToken
+                ) {
+                    super.onCodeSent(verificationId, token)
+
+                    storedVerificationId = verificationId
+                    resendToken = token
+
+                    continuation.resume(AuthResult.OtpSentSuccess)
                 }
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                continuation.resume(AuthResult.UnknownError)
             }
+
+            if (isResendAction) {
+                val options = PhoneAuthOptions.newBuilder(firebaseAuth)
+                    .setPhoneNumber(phoneNumber)
+                    .setTimeout(55L, TimeUnit.SECONDS)
+                    .setActivity(context as Activity)
+                    .setCallbacks(callbacks)
+                    .setForceResendingToken(resendToken)
+                    .build()
+                PhoneAuthProvider.verifyPhoneNumber(options)
+            } else {
+                val options = PhoneAuthOptions.newBuilder(firebaseAuth)
+                    .setPhoneNumber(phoneNumber)
+                    .setTimeout(55L, TimeUnit.SECONDS)
+                    .setActivity(context as Activity)
+                    .setCallbacks(callbacks)
+                    .build()
+                PhoneAuthProvider.verifyPhoneNumber(options)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            continuation.resume(AuthResult.UnknownError)
         }
     }
 
@@ -170,6 +166,6 @@ class AuthRepositoryImpl(
 
     override suspend fun logout() {
         sharedPreferences.edit().clear().apply()
-        context.dataStore.updateData { UserProfileSerializer.defaultValue }
+        dataStore.updateData { UserProfileSerializer.defaultValue }
     }
 }

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
-import com.onthewake.onthewakelive.feature_profile.domain.module.ProfileState
 import com.onthewake.onthewakelive.feature_profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

@@ -9,9 +9,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import com.onthewake.onthewakelive.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -24,6 +26,7 @@ fun StandardScaffold(
     isUserAdmin: Boolean,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val configuration = LocalConfiguration.current
     val isPortraitOrientation = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
@@ -34,12 +37,12 @@ fun StandardScaffold(
         BottomNavItem(
             route = Screen.QueueScreen.route,
             icon = Icons.Default.Home,
-            contentDescription = "Queue"
+            contentDescription = context.getString(R.string.queue)
         ),
         BottomNavItem(
             route = Screen.ProfileScreen.route,
             icon = Icons.Default.Person,
-            contentDescription = "Profile"
+            contentDescription = context.getString(R.string.profile)
         )
     )
 

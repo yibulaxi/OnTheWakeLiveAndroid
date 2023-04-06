@@ -10,6 +10,5 @@ sealed interface EditProfileUiEvent {
     data class EditProfileInstagramChanged(val value: String): EditProfileUiEvent
     data class EditProfileDateOfBirthChanged(val value: String): EditProfileUiEvent
     object EditProfile: EditProfileUiEvent
-
     data class CropImage(val uri: Uri?) : EditProfileUiEvent
 }

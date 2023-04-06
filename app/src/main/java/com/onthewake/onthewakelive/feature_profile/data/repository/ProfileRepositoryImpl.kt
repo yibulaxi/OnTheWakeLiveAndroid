@@ -40,8 +40,7 @@ class ProfileRepositoryImpl(
                     profilePictureUri = response.profilePictureUri
                 )
             }
-
-            Resource.Success(response.toProfile())
+            Resource.Success(response)
         } catch (exception: Exception) {
             Resource.Error(handleNetworkError(exception))
         }

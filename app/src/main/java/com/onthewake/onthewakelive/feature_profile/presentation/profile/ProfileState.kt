@@ -1,4 +1,4 @@
-package com.onthewake.onthewakelive.feature_profile.domain.module
+package com.onthewake.onthewakelive.feature_profile.presentation.profile
 
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
 

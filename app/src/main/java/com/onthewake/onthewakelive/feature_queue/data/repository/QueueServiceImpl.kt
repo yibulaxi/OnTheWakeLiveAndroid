@@ -20,7 +20,7 @@ class QueueServiceImpl(
 
     override suspend fun getProfileDetails(queueItemId: String): Resource<Profile> = try {
         val response = queueApi.getProfileDetails(queueItemId = queueItemId)
-        Resource.Success(response.toProfile())
+        Resource.Success(response)
     } catch (exception: Exception) {
         Resource.Error(handleNetworkError(exception))
     }

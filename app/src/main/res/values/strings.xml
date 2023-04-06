@@ -8,11 +8,7 @@
     <string name="validate_invalid_phone_number_error">Invalid phone number</string>
     <string name="validate_password_error">The password can\'t be blank</string>
     <string name="validate_password_length_error">The password needs to consist of at least 6 characters</string>
-    <string name="validate_otp_error">OTP cannot be empty</string>
-    <string name="validate_date_of_birth_error">Date of birth can\'t be greater than the current year</string>
-    <string name="validate_date_of_birth_day_error">Birthday can\'t be more than the number of days in a month</string>
-    <string name="validate_date_of_birth_month_error">The month of birth can\'t be greater than the number of months in a year</string>
-    <string name="validate_user_error">There is already this user in the queue</string>
+    <string name="validate_user_error">Oops! There is already this user in the queue.</string>
 
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show password</string>
@@ -113,4 +109,14 @@
     <string name="cancel">Cancel</string>
     <string name="create_account">Create account</string>
     <string name="successfully_updated_profile">Successfully updated profile</string>
+
+    <string name="invalid_token_error">Invalid token. Please make sure you have entered it correctly.</string>
+    <string name="resend">Resend</string>
+    <string name="code">Code</string>
+    <string name="code_has_been_sent_to">An 6 digit code has been sent to&#160;</string>
+    <string name="didnt_receive_code">Didn\'t receive code? Resend after&#160;</string>
+    <string name="seconds">s</string>
+    <string name="user_already_exists">Oops! User with this phone number already exists</string>
+    <string name="invalid_phone_number">Invalid phone number format</string>
+    <string name="otp_too_many_requests">Too many request on trying to send OTP</string>
 </resources>

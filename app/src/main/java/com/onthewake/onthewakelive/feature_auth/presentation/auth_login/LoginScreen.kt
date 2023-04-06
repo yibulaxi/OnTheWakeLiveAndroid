@@ -66,9 +66,7 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
-    ) {
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         AnimatedContent(targetState = state.isLoading) { isLoading ->
             if (isLoading) StandardLoadingView()
             else Box(
@@ -94,9 +92,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     StandardTextField(
                         value = state.signInPhoneNumber,
-                        onValueChange = {
-                            viewModel.onEvent(SignInPhoneNumberChanged(it))
-                        },
+                        onValueChange = { viewModel.onEvent(SignInPhoneNumberChanged(it)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Phone,
                             imeAction = ImeAction.Next
@@ -107,9 +103,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     StandardTextField(
                         value = state.signInPassword,
-                        onValueChange = {
-                            viewModel.onEvent(SignInPasswordChanged(it))
-                        },
+                        onValueChange = { viewModel.onEvent(SignInPasswordChanged(it)) },
                         label = stringResource(id = R.string.password),
                         isPasswordTextField = true,
                         keyboardOptions = KeyboardOptions(
@@ -141,9 +135,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(vertical = 12.dp)
-                        .clickable {
-                            navController.navigate(Screen.RegisterScreen.route)
-                        },
+                        .clickable { navController.navigate(Screen.RegisterScreen.route) },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {

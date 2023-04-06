@@ -1,12 +1,12 @@
 package com.onthewake.onthewakelive.feature_auth.presentation.auth_otp
 
-import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
+import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.core.presentation.components.StandardTopBar
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
@@ -29,8 +29,6 @@ import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalAnimationApi::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OtpScreen(
     navController: NavHostController,
@@ -38,10 +36,10 @@ fun OtpScreen(
 ) {
     val state = viewModel.state.value
 
-    val snackBarHostState = remember { SnackbarHostState() }
-
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
         viewModel.authResult.collectLatest { result ->
@@ -50,7 +48,7 @@ fun OtpScreen(
                     popUpTo(Screen.LoginScreen.route) { inclusive = true }
                 }
                 AuthResult.IncorrectOtp -> snackBarHostState.showSnackbar(
-                    message = "Incorrect OTP"
+                    message = context.getString(R.string.invalid_token_error)
                 )
                 else -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.unknown_error)
@@ -59,52 +57,49 @@ fun OtpScreen(
         }
     }
 
-    AnimatedContent(targetState = state.isLoading) { isLoading ->
-        if (isLoading) StandardLoadingView()
-        else Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-            topBar = { StandardTopBar(onBackClicked = navController::popBackStack) }
+    AnimatedScaffold(
+        isLoading = state.isLoading,
+        topBar = { StandardTopBar(onBackClicked = navController::popBackStack) }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 100.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 100.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(id = R.string.verify_phone_number),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "An 6 digit code has been sent to\n${state.signUpPhoneNumber}",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    StandardTextField(
-                        value = state.otp,
-                        onValueChange = {
-                            if (it.length <= 6) viewModel.onEvent(OtpEvent.OtpChanged(it))
-                            if (it.length == 6) {
-                                focusManager.clearFocus()
-                                viewModel.verifyOtpAndSignUp()
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
-                        label = "Code",
-                        errorText = state.otpError
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Timer(onResendClicked = { viewModel.resendCode(context) })
-                }
+            Column {
+                Text(
+                    text = stringResource(id = R.string.verify_phone_number),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.code_has_been_sent_to) + state.signUpPhoneNumber,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                StandardTextField(
+                    value = state.otp,
+                    onValueChange = {
+                        if (it.length <= 6) viewModel.onEvent(OtpEvent.OtpChanged(it))
+                        if (it.length == 6) {
+                            focusManager.clearFocus()
+                            viewModel.onEvent(OtpEvent.VerifyOtpAndSignUp)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    label = stringResource(R.string.code),
+                    errorText = state.otpError
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Timer(onResendClicked = { viewModel.resendCode(context) })
             }
         }
     }
@@ -126,19 +121,19 @@ fun Timer(onResendClicked: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Didn't receive code? Resend after ",
+            text = stringResource(R.string.didnt_receive_code),
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             modifier = Modifier.weight(1f),
-            text = "${currentTime}s",
+            text = currentTime.toString() + stringResource(R.string.seconds),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
         )
         TextButton(onClick = onResendClicked, enabled = currentTime <= 0) {
-            Text(text = "Resend")
+            Text(text = stringResource(R.string.resend))
         }
     }
 }

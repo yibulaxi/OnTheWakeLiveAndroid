@@ -53,12 +53,4 @@ class ValidationUseCase {
         )
         return ValidationResult(successful = true)
     }
-
-    fun validateOtp(otp: String): ValidationResult {
-        if (otp.isBlank()) return ValidationResult(
-            successful = false,
-            errorMessage = UIText.StringResource(R.string.validate_otp_error)
-        )
-        return ValidationResult(successful = true)
-    }
 }
