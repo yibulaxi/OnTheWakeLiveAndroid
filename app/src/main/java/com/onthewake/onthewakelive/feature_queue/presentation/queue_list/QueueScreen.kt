@@ -146,7 +146,7 @@ fun QueueScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(id = R.string.add_icon),
+                    contentDescription = stringResource(id = R.string.add),
                     tint = Color.White
                 )
             }

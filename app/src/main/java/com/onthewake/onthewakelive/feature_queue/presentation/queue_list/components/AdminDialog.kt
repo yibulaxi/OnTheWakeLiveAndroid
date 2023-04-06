@@ -71,7 +71,7 @@ fun AdminDialog(
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         }
-                        Text(text = stringResource(id = R.string.left_line_admin))
+                        Text(text = stringResource(id = R.string.left_line))
                     }
                     Spacer(modifier = Modifier.width(20.dp))
                     Button(
@@ -89,7 +89,7 @@ fun AdminDialog(
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         }
-                        Text(text = stringResource(id = R.string.right_line_admin))
+                        Text(text = stringResource(id = R.string.right_line))
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))

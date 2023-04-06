@@ -141,7 +141,7 @@ fun ProfileScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.edit_icon)
+                            contentDescription = stringResource(id = R.string.edit)
                         )
                     }
                 }

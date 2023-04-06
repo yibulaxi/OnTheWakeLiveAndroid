@@ -1,7 +1,9 @@
 package com.onthewake.onthewakelive.feature_profile.domain.module
 
+import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
 
+@Keep
 @Serializable
 data class Profile(
     val userId: String,

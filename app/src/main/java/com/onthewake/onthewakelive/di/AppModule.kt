@@ -29,7 +29,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    val Context.dataStore by dataStore(
+    private val Context.dataStore by dataStore(
         fileName = "user-profile.json",
         serializer = UserProfileSerializer
     )

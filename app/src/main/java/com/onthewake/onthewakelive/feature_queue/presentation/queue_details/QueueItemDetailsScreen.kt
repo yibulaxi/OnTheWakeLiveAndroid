@@ -32,10 +32,10 @@ import com.onthewake.onthewakelive.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QueueDetailsScreen(
+fun QueueItemDetailsScreen(
     imageLoader: ImageLoader,
     navController: NavHostController,
-    viewModel: QueueDetailsViewModel = hiltViewModel()
+    viewModel: QueueItemDetailsViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
 

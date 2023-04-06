@@ -1,7 +1,6 @@
 package com.onthewake.onthewakelive.feature_auth.presentation.auth_login
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
+import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
@@ -66,89 +65,89 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
-        AnimatedContent(targetState = state.isLoading) { isLoading ->
-            if (isLoading) StandardLoadingView()
-            else Box(
+    AnimatedScaffold(
+        isLoading = state.isLoading,
+        snackBarHost = { SnackbarHost(hostState = snackBarHostState) }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(all = 24.dp)
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(all = 24.dp)
+                    .padding(bottom = 80.dp)
+                    .align(Alignment.Center),
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(bottom = 80.dp)
-                        .align(Alignment.Center),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.sign_in),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    StandardTextField(
-                        value = state.signInPhoneNumber,
-                        onValueChange = { viewModel.onEvent(SignInPhoneNumberChanged(it)) },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Phone,
-                            imeAction = ImeAction.Next
-                        ),
-                        label = stringResource(id = R.string.phone_number),
-                        errorText = state.signInPhoneNumberError,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    StandardTextField(
-                        value = state.signInPassword,
-                        onValueChange = { viewModel.onEvent(SignInPasswordChanged(it)) },
-                        label = stringResource(id = R.string.password),
-                        isPasswordTextField = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                viewModel.onEvent(SignIn)
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                focusManager.clearFocus()
-                            }
-                        ),
-                        errorText = state.signInPasswordError,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
+                Text(
+                    text = stringResource(id = R.string.sign_in),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                StandardTextField(
+                    value = state.signInPhoneNumber,
+                    onValueChange = { viewModel.onEvent(SignInPhoneNumberChanged(it)) },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Phone,
+                        imeAction = ImeAction.Next
+                    ),
+                    label = stringResource(id = R.string.phone_number),
+                    errorText = state.signInPhoneNumberError,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                StandardTextField(
+                    value = state.signInPassword,
+                    onValueChange = { viewModel.onEvent(SignInPasswordChanged(it)) },
+                    label = stringResource(id = R.string.password),
+                    isPasswordTextField = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
                             viewModel.onEvent(SignIn)
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             focusManager.clearFocus()
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text(text = stringResource(id = R.string.sign_in))
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(vertical = 12.dp)
-                        .clickable { navController.navigate(Screen.RegisterScreen.route) },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                        }
+                    ),
+                    errorText = state.signInPasswordError,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        viewModel.onEvent(SignIn)
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        focusManager.clearFocus()
+                    },
+                    modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.dont_have_an_account_yet),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(id = R.string.create),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Text(text = stringResource(id = R.string.sign_in))
                 }
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(vertical = 12.dp)
+                    .clickable { navController.navigate(Screen.RegisterScreen.route) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.dont_have_an_account_yet),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(id = R.string.create),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

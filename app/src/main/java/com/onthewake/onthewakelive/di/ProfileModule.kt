@@ -40,5 +40,4 @@ object ProfileModule {
         prefs: SharedPreferences,
         dataStore: DataStore<Profile>
     ): ProfileRepository = ProfileRepositoryImpl(profileApi, storage, prefs, dataStore)
-
 }

@@ -16,7 +16,7 @@ import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.Regis
 import com.onthewake.onthewakelive.feature_full_size_avatar.presentation.FullSizeAvatarScreen
 import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileScreen
 import com.onthewake.onthewakelive.feature_profile.presentation.profile.ProfileScreen
-import com.onthewake.onthewakelive.feature_queue.presentation.queue_details.QueueDetailsScreen
+import com.onthewake.onthewakelive.feature_queue.presentation.queue_details.QueueItemDetailsScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.QueueScreen
 import com.onthewake.onthewakelive.feature_splash.presentation.ServerUnavailableScreen
 
@@ -56,7 +56,7 @@ fun SetupNavGraph(
                 navArgument(DETAILS_ARGUMENT_KEY) { type = NavType.StringType }
             )
         ) {
-            QueueDetailsScreen(imageLoader = imageLoader, navController = navController)
+            QueueItemDetailsScreen(imageLoader = imageLoader, navController = navController)
         }
         composable(route = Screen.ProfileScreen.route) {
             ProfileScreen(navController = navController, imageLoader = imageLoader)

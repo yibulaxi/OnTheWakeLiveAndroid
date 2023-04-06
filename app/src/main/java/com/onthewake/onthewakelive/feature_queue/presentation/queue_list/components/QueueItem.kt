@@ -43,7 +43,7 @@ fun QueueItem(
             Icon(
                 modifier = Modifier.padding(end = 20.dp),
                 imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(id = R.string.delete_icon),
+                contentDescription = stringResource(id = R.string.delete),
                 tint = MaterialTheme.colorScheme.onError
             )
         },

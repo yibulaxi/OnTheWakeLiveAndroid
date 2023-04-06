@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class QueueDetailsViewModel @Inject constructor(
+class QueueItemDetailsViewModel @Inject constructor(
     private val queueService: QueueService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
