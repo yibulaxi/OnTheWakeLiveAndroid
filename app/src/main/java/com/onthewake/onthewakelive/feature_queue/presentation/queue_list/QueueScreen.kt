@@ -9,12 +9,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -32,9 +35,6 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedShimmer
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
@@ -45,7 +45,7 @@ import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.compone
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun QueueScreen(
     viewModel: QueueViewModel = hiltViewModel(),
@@ -61,7 +61,7 @@ fun QueueScreen(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    val pagerState = rememberPagerState(pageCount = 2, initialPage = 1)
+    val pagerState = rememberPagerState(initialPage = 1)
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -161,7 +161,7 @@ fun QueueScreen(
 
             AnimatedContent(targetState = state.isQueueLoading) { isLoading ->
                 if (isLoading) AnimatedShimmer()
-                else HorizontalPager(state = pagerState) { page ->
+                else HorizontalPager(state = pagerState, pageCount = 2) { page ->
                     when (page) {
                         0 -> QueueLeftContent(
                             state = state,

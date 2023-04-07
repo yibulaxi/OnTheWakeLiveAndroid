@@ -1,5 +1,7 @@
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -13,12 +15,10 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 import com.onthewake.onthewakelive.R
 import kotlinx.coroutines.launch
 
-@ExperimentalPagerApi
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabLayout(pagerState: PagerState) {
     val context = LocalContext.current
@@ -56,7 +56,7 @@ fun TabLayout(pagerState: PagerState) {
                 },
                 text = {
                     Text(
-                        list[index].first,
+                        text = list[index].first,
                         color = if (pagerState.currentPage == index)
                             MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurfaceVariant
