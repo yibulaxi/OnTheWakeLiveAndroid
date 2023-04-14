@@ -70,7 +70,9 @@ class ProfileRepositoryImpl(
             }
 
             profileApi.updateProfile(
-                updateProfileData = updateProfileData.copy(profilePictureUri = profilePictureUri)
+                updateProfileData = updateProfileData.copy(
+                    profilePictureUri = profilePictureUri
+                )
             )
             dataStore.updateData {
                 it.copy(
@@ -94,7 +96,7 @@ class ProfileRepositoryImpl(
     ): Uri? = suspendCoroutine { continuation ->
         val child = prefs.getString(Constants.PREFS_USER_ID, null)
 
-        if (child == null || child.isEmpty() || profilePictureUri == null) {
+        if (child.isNullOrEmpty() || profilePictureUri == null) {
             continuation.resume(null)
             return@suspendCoroutine
         }

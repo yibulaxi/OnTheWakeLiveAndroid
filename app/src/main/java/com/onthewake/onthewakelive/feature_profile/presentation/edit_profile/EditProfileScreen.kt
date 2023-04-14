@@ -219,7 +219,7 @@ fun EditProfileScreen(
                 onValueChange = {},
                 label = { Text(text = stringResource(id = R.string.date_of_birth)) },
                 enabled = false,
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
                     disabledIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledTextColor = MaterialTheme.colorScheme.onSurface
