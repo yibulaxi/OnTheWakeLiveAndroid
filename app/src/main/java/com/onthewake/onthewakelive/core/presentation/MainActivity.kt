@@ -6,15 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
-import coil.imageLoader
 import com.onthewake.onthewakelive.core.presentation.components.StandardScaffold
 import com.onthewake.onthewakelive.core.presentation.ui.theme.OnTheWakeLiveTheme
 import com.onthewake.onthewakelive.core.utils.Constants
-import com.onthewake.onthewakelive.core.utils.Constants.ADMIN_IDS
+import com.onthewake.onthewakelive.core.utils.isUserAdmin
+import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketService
 import com.onthewake.onthewakelive.feature_splash.presentation.SplashViewModel
 import com.onthewake.onthewakelive.navigation.SetupNavGraph
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -22,6 +24,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var preferences: SharedPreferences
+
+    @Inject
+    lateinit var queueSocketService: QueueSocketService
 
     private val splashViewModel: SplashViewModel by viewModels()
 
@@ -35,20 +40,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             OnTheWakeLiveTheme {
                 val navController = rememberNavController()
-                val isUserAdmin = preferences.getString(Constants.PREFS_USER_ID, null) in ADMIN_IDS
-
+                val userId = preferences.getString(Constants.PREFS_USER_ID, null)
                 val state = splashViewModel.state.value
 
                 state.startDestination?.let { startDestination ->
-                    StandardScaffold(navController = navController, isUserAdmin = isUserAdmin) {
+                    StandardScaffold(
+                        navController = navController,
+                        isUserAdmin = userId.isUserAdmin()
+                    ) {
                         SetupNavGraph(
                             navController = navController,
-                            imageLoader = imageLoader,
                             startDestination = startDestination
                         )
                     }
                 }
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        lifecycleScope.launch {
+            queueSocketService.closeSession()
         }
     }
 }

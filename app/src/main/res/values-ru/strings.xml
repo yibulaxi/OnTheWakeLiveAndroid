@@ -64,4 +64,7 @@
     <string name="cancel">Отменить</string>
     <string name="create">Создать!</string>
     <string name="error_couldnt_reach_server">Ой! Не удалось связаться с сервером. Проверьте свое подключение к Интернету</string>
+    <string name="couldnt_establish_a_connection">Не удалось установить соединение</string>
+    <string name="allow_notifications">Разрешите показ уведомений</string>
+    <string name="settings">Настройки</string>
 </resources>

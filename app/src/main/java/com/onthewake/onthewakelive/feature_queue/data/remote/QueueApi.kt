@@ -10,7 +10,7 @@ interface QueueApi {
     @GET("/queue")
     suspend fun getQueue(): List<QueueItem>
 
-    @GET("/queue_item/details")
+    @GET("/queue_item_details")
     suspend fun getProfileDetails(
         @Query("queueItemId") queueItemId: String
     ): Profile

@@ -5,7 +5,6 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
-import coil.ImageLoader
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -58,14 +57,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideValidateUseCase(): ValidationUseCase = ValidationUseCase()
-
-    @Provides
-    @Singleton
-    fun provideImageLoader(
-        @ApplicationContext context: Context
-    ): ImageLoader = ImageLoader.Builder(context)
-        .crossfade(true)
-        .build()
 
     @Provides
     @Singleton

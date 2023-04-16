@@ -13,21 +13,21 @@ import com.onthewake.onthewakelive.core.presentation.utils.UIText.StringResource
 import com.onthewake.onthewakelive.core.utils.Constants
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
 import com.onthewake.onthewakelive.core.utils.Resource
-import com.onthewake.onthewakelive.feature_queue.data.repository.QueueSocketService
 import com.onthewake.onthewakelive.feature_queue.domain.module.Action
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
-import com.onthewake.onthewakelive.feature_queue.domain.module.QueueSocketResponse
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueService
+import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltViewModel
 class QueueViewModel @Inject constructor(
     private val queueService: QueueService,
-    prefs: SharedPreferences,
-    okHttpClient: OkHttpClient
+    private val queueSocketService: QueueSocketService,
+    prefs: SharedPreferences
 ) : ViewModel() {
 
     private val _state = mutableStateOf(QueueState())
@@ -37,25 +37,36 @@ class QueueViewModel @Inject constructor(
 
     val userId = prefs.getString(PREFS_USER_ID, null)
 
-    private val queueSocketService = QueueSocketService(
-        viewModel = this, okHttpClient = okHttpClient
-    )
-
     init {
+        if (!queueSocketService.isConnectionEstablished()) connectToQueue()
+        else observeQueue()
+
         getQueue()
     }
 
-    fun onMessage(queueSocketResponse: QueueSocketResponse) {
-        val newList = state.value.queue.toMutableList()
-            .apply {
-                if (queueSocketResponse.action == Action.JOIN_THE_QUEUE) {
-                    add(state.value.queue.size, queueSocketResponse.queueItem)
-                }
-                else removeIf { queueItem ->
-                    queueItem.id == queueSocketResponse.queueItem.id
-                }
+    private fun connectToQueue() {
+        viewModelScope.launch {
+            when (val result = queueSocketService.initSession()) {
+                is Resource.Success -> observeQueue()
+                is Resource.Error -> _state.value = state.value.copy(error = result.message)
             }
-        _state.value = state.value.copy(queue = newList)
+        }
+    }
+
+    private fun observeQueue() {
+        queueSocketService.observeQueue()
+            .onEach { response ->
+                val newList = state.value.queue
+                    .toMutableList()
+                    .apply {
+                        if (response.action == Action.JOIN_THE_QUEUE) {
+                            add(state.value.queue.size, response.queueItem)
+                        } else {
+                            removeIf { it == response.queueItem }
+                        }
+                    }
+                _state.value = state.value.copy(queue = newList)
+            }.launchIn(viewModelScope)
     }
 
     private fun getQueue() {
@@ -65,7 +76,10 @@ class QueueViewModel @Inject constructor(
                 is Resource.Success -> _state.value = state.value.copy(
                     queue = result.data ?: emptyList()
                 )
-                is Resource.Error -> _state.value = state.value.copy(error = result.message)
+
+                is Resource.Error -> _state.value = state.value.copy(
+                    error = result.message
+                )
             }
             _state.value = state.value.copy(isQueueLoading = false)
         }
@@ -75,7 +89,9 @@ class QueueViewModel @Inject constructor(
         canJoinTheQueue(
             line = line,
             onSuccess = {
-                queueSocketService.joinTheQueue(line = line, firstName = firstName)
+                viewModelScope.launch {
+                    queueSocketService.joinTheQueue(line = line, firstName = firstName)
+                }
             },
             onError = { errorMessage ->
                 _state.value = state.value.copy(error = errorMessage)
@@ -120,10 +136,5 @@ class QueueViewModel @Inject constructor(
         viewModelScope.launch {
             queueSocketService.leaveTheQueue(queueItemId)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        queueSocketService.closeSession()
     }
 }

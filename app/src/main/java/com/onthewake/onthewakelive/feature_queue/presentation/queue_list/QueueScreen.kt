@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,13 +35,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.ImageLoader
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedShimmer
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.isUserAdmin
 import com.onthewake.onthewakelive.core.utils.openNotificationSettings
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
+import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.*
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.launch
@@ -49,17 +50,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun QueueScreen(
     viewModel: QueueViewModel = hiltViewModel(),
-    navController: NavHostController,
-    imageLoader: ImageLoader
+    navController: NavHostController
 ) {
     val state = viewModel.state.value
     val userId = viewModel.userId
 
-    var showConfirmationDialog by remember { mutableStateOf(false) }
-    var queueItemIdToDelete by remember { mutableStateOf("") }
-
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+
+    var showLeaveQueueDialog by remember { mutableStateOf(false to "") }
 
     val pagerState = rememberPagerState(initialPage = 1)
     val snackBarHostState = remember { SnackbarHostState() }
@@ -80,23 +79,8 @@ fun QueueScreen(
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            hasNotificationPermission = isGranted
-
-            if (!isGranted) scope.launch {
-                val result = snackBarHostState.showSnackbar(
-                    "Разрешите показ уведомений", actionLabel = "Settings"
-                )
-                if (result == SnackbarResult.ActionPerformed) context.openNotificationSettings()
-            }
-        }
+        onResult = { isGranted -> hasNotificationPermission = isGranted }
     )
-
-    LaunchedEffect(key1 = true) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
 
     LaunchedEffect(key1 = state.error) {
         state.error?.let { error ->
@@ -104,10 +88,10 @@ fun QueueScreen(
         }
     }
 
-    if (showConfirmationDialog) LeaveQueueConfirmationDialog(
-        showDialog = { showConfirmationDialog = it },
+    if (showLeaveQueueDialog.first) LeaveQueueConfirmationDialog(
+        showDialog = { showLeaveQueueDialog = showLeaveQueueDialog.copy(first = it) },
         isUserAdmin = viewModel.userId.isUserAdmin(),
-        onLeaveQueue = { viewModel.leaveTheQueue(queueItemIdToDelete) }
+        onLeaveQueue = { viewModel.leaveTheQueue(showLeaveQueueDialog.second) }
     )
 
     if (viewModel.showDialog) AdminDialog(
@@ -128,7 +112,8 @@ fun QueueScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
-                }, colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor)
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor)
             )
         },
         floatingActionButton = {
@@ -136,11 +121,24 @@ fun QueueScreen(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+
                     if (hasNotificationPermission) {
                         if (userId.isUserAdmin()) viewModel.showDialog = true
                         else viewModel.joinTheQueue(
                             line = if (pagerState.currentPage == 0) Line.LEFT else Line.RIGHT
                         )
+                    } else scope.launch {
+                        val result = snackBarHostState.showSnackbar(
+                            message = context.getString(R.string.allow_notifications),
+                            actionLabel = context.getString(R.string.settings),
+                            duration = SnackbarDuration.Long
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            context.openNotificationSettings()
+                        }
                     }
                 }
             ) {
@@ -151,11 +149,11 @@ fun QueueScreen(
                 )
             }
         }
-    ) { padding ->
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(paddingValues)
         ) {
             TabLayout(pagerState = pagerState)
 
@@ -163,44 +161,56 @@ fun QueueScreen(
                 if (isLoading) AnimatedShimmer()
                 else HorizontalPager(state = pagerState, pageCount = 2) { page ->
                     when (page) {
-                        0 -> QueueLeftContent(
-                            state = state,
-                            userId = userId,
-                            imageLoader = imageLoader,
-                            onDetailsClicked = { queueItemId ->
-                                navController.navigate(
-                                    Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
-                                )
-                            },
-                            onSwipeToDelete = { queueItemId ->
-                                showConfirmationDialog = true
-                                queueItemIdToDelete = queueItemId
-                            },
-                            onUserAvatarClicked = { pictureUrl ->
-                                navController.navigate(
-                                    Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
-                                )
+                        0 -> {
+                            val leftQueue = remember(state.queue) {
+                                state.queue.filter { it.line == Line.LEFT }
                             }
-                        )
-                        1 -> QueueRightContent(
-                            state = state,
-                            userId = userId,
-                            imageLoader = imageLoader,
-                            onDetailsClicked = { queueItemId ->
-                                navController.navigate(
-                                    Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
-                                )
-                            },
-                            onSwipeToDelete = { queueItemId ->
-                                showConfirmationDialog = true
-                                queueItemIdToDelete = queueItemId
-                            },
-                            onUserAvatarClicked = { pictureUrl ->
-                                navController.navigate(
-                                    Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
-                                )
+
+                            QueueContent(
+                                queue = leftQueue,
+                                userId = userId,
+                                onDetailsClicked = { queueItemId ->
+                                    navController.navigate(
+                                        Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
+                                    )
+                                },
+                                onSwipeToDelete = { queueItemId ->
+                                    showLeaveQueueDialog = showLeaveQueueDialog.copy(
+                                        first = true, second = queueItemId
+                                    )
+                                },
+                                onUserAvatarClicked = { pictureUrl ->
+                                    navController.navigate(
+                                        Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
+                                    )
+                                }
+                            )
+                        }
+                        1 -> {
+                            val rightQueue = remember(state.queue) {
+                                state.queue.filter { it.line == Line.RIGHT }
                             }
-                        )
+
+                            QueueContent(
+                                queue = rightQueue,
+                                userId = userId,
+                                onDetailsClicked = { queueItemId ->
+                                    navController.navigate(
+                                        Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
+                                    )
+                                },
+                                onSwipeToDelete = { queueItemId ->
+                                    showLeaveQueueDialog = showLeaveQueueDialog.copy(
+                                        first = true, second = queueItemId
+                                    )
+                                },
+                                onUserAvatarClicked = { pictureUrl ->
+                                    navController.navigate(
+                                        Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -209,61 +219,23 @@ fun QueueScreen(
 }
 
 @Composable
-fun QueueLeftContent(
-    state: QueueState,
+private fun QueueContent(
+    queue: List<QueueItem>,
     userId: String?,
-    imageLoader: ImageLoader,
     onDetailsClicked: (String) -> Unit,
     onSwipeToDelete: (String) -> Unit,
     onUserAvatarClicked: (String) -> Unit
 ) {
-    val leftQueue = remember(state.queue) {
-        state.queue.filter { it.line == Line.LEFT }
-    }
-
-    AnimatedContent(targetState = leftQueue.isEmpty()) { isLeftQueueEmpty ->
-        if (isLeftQueueEmpty) EmptyContent()
+    AnimatedContent(targetState = queue.isEmpty()) { isQueueEmpty ->
+        if (isQueueEmpty) EmptyContent()
         else LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(10.dp)
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(leftQueue) { item ->
+            items(queue) { item ->
                 QueueItem(
                     queueItem = item,
-                    imageLoader = imageLoader,
-                    userId = userId,
-                    onDetailsClicked = onDetailsClicked,
-                    onSwipeToDelete = onSwipeToDelete,
-                    onUserAvatarClicked = onUserAvatarClicked
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun QueueRightContent(
-    state: QueueState,
-    userId: String?,
-    imageLoader: ImageLoader,
-    onDetailsClicked: (String) -> Unit,
-    onSwipeToDelete: (String) -> Unit,
-    onUserAvatarClicked: (String) -> Unit
-) {
-    val rightQueue = remember(state.queue) {
-        state.queue.filter { it.line == Line.RIGHT }
-    }
-
-    AnimatedContent(targetState = rightQueue.isEmpty()) { isRightQueueEmpty ->
-        if (isRightQueueEmpty) EmptyContent()
-        else LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(10.dp)
-        ) {
-            items(rightQueue) { item ->
-                QueueItem(
-                    queueItem = item,
-                    imageLoader = imageLoader,
                     userId = userId,
                     onDetailsClicked = onDetailsClicked,
                     onSwipeToDelete = onSwipeToDelete,

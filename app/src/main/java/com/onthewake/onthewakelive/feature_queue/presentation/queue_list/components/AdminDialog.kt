@@ -108,11 +108,11 @@ fun AdminDialog(
                         val addToQueueResult = ValidationUseCase().validateAdminAddToQueue(
                             firstName = firstNameFieldState, queue = queue
                         )
-                        errorMessage = addToQueueResult.errorMessage
-
                         if (addToQueueResult.successful) {
                             onAddClicked(line, firstNameFieldState)
                             showDialog(false)
+                        } else {
+                            errorMessage = addToQueueResult.errorMessage
                         }
                     },
                     colors = ButtonDefaults.buttonColors(

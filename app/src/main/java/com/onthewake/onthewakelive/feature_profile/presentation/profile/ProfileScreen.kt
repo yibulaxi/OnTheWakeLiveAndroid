@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.ImageLoader
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
@@ -37,8 +36,7 @@ import com.onthewake.onthewakelive.navigation.Screen
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
-    viewModel: ProfileViewModel = hiltViewModel(),
-    imageLoader: ImageLoader
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
 
@@ -107,7 +105,6 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     StandardImageView(
-                        imageLoader = imageLoader,
                         model = state.profilePictureUri,
                         onUserAvatarClicked = { pictureUrl ->
                             navController.navigate(

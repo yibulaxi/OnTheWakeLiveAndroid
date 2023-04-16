@@ -5,7 +5,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -28,8 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.ImageLoader
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -47,7 +46,6 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
-    imageLoader: ImageLoader,
     navController: NavHostController
 ) {
     val state = viewModel.state.value
@@ -129,7 +127,7 @@ fun EditProfileScreen(
                 modifier = Modifier
                     .padding(top = 30.dp)
                     .size(140.dp),
-                shape = RoundedCornerShape(40.dp),
+                shape = CircleShape,
                 onClick = {
                     galleryLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -152,17 +150,22 @@ fun EditProfileScreen(
                     if (isImageLoading.value) CircularProgressIndicator(
                         modifier = Modifier.size(42.dp)
                     )
-                    Image(
+                    AsyncImage(
                         modifier = Modifier.fillMaxSize(),
-                        painter = rememberAsyncImagePainter(
-                            model = profilePictureUri ?: state.profilePictureUri,
-                            imageLoader = imageLoader,
-                            onLoading = { isImageLoading.value = true },
-                            onError = { isImageLoading.value = false },
-                            onSuccess = { isImageLoading.value = false }
-                        ),
+                        model = profilePictureUri ?: state.profilePictureUri,
                         contentDescription = stringResource(id = R.string.user_picture)
                     )
+//                    Image(
+//                        modifier = Modifier.fillMaxSize(),
+//                        painter = rememberAsyncImagePainter(
+//                            model = profilePictureUri ?: state.profilePictureUri,
+//                            imageLoader = imageLoader,
+//                            onLoading = { isImageLoading.value = true },
+//                            onError = { isImageLoading.value = false },
+//                            onSuccess = { isImageLoading.value = false }
+//                        ),
+//                        contentDescription = stringResource(id = R.string.user_picture)
+//                    )
                 }
             }
             Spacer(modifier = Modifier.height(30.dp))

@@ -6,7 +6,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import coil.ImageLoader
 import com.onthewake.onthewakelive.core.utils.Constants.DETAILS_ARGUMENT_KEY
 import com.onthewake.onthewakelive.core.utils.Constants.PICTURE_URL_ARGUMENT_KEY
 import com.onthewake.onthewakelive.core.utils.Constants.REGISTER_DATA_ARGUMENT_KEY
@@ -23,8 +22,7 @@ import com.onthewake.onthewakelive.feature_splash.presentation.ServerUnavailable
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    startDestination: Screen,
-    imageLoader: ImageLoader
+    startDestination: Screen
 ) {
     NavHost(
         navController = navController,
@@ -48,7 +46,7 @@ fun SetupNavGraph(
             OtpScreen(navController = navController)
         }
         composable(route = Screen.QueueScreen.route) {
-            QueueScreen(navController = navController, imageLoader = imageLoader)
+            QueueScreen(navController = navController)
         }
         composable(
             route = Screen.QueueDetailsScreen.route,
@@ -56,13 +54,13 @@ fun SetupNavGraph(
                 navArgument(DETAILS_ARGUMENT_KEY) { type = NavType.StringType }
             )
         ) {
-            QueueItemDetailsScreen(imageLoader = imageLoader, navController = navController)
+            QueueItemDetailsScreen(navController = navController)
         }
         composable(route = Screen.ProfileScreen.route) {
-            ProfileScreen(navController = navController, imageLoader = imageLoader)
+            ProfileScreen(navController = navController)
         }
         composable(route = Screen.EditProfileScreen.route) {
-            EditProfileScreen(imageLoader = imageLoader, navController = navController)
+            EditProfileScreen(navController = navController)
         }
         composable(
             route = Screen.FullSizeAvatarScreen.route,
@@ -74,7 +72,6 @@ fun SetupNavGraph(
 
             FullSizeAvatarScreen(
                 navController = navController,
-                imageLoader = imageLoader,
                 profilePictureUrl = profilePictureUrl
             )
         }

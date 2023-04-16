@@ -12,7 +12,6 @@ class OnTheWakeLiveApp: Application() {
         super.onCreate()
 
         OneSignal.initWithContext(this)
-        OneSignal.promptForPushNotifications()
         OneSignal.setAppId(Constants.ONESIGNAL_APP_ID)
     }
 }

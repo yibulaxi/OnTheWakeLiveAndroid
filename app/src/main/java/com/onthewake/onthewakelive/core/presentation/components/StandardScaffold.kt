@@ -69,6 +69,7 @@ fun StandardScaffold(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             if (navController.currentDestination?.route != item.route) {
+                                navController.popBackStack()
                                 navController.navigate(item.route) { launchSingleTop = true }
                             }
                         }

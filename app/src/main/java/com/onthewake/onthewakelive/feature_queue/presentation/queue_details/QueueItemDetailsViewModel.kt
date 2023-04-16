@@ -45,7 +45,9 @@ class QueueItemDetailsViewModel @Inject constructor(
                         )
                     }
                 }
-                is Resource.Error -> _state.value = state.value.copy(error = result.message)
+                is Resource.Error -> _state.value = state.value.copy(
+                    error = result.message
+                )
             }
             _state.value = state.value.copy(isLoading = false)
         }

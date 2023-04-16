@@ -6,10 +6,10 @@ import retrofit2.http.*
 
 interface ProfileApi {
 
-    @GET("/api/user/profile")
+    @GET("/profile")
     suspend fun getProfile(): Profile
 
-    @PUT("/api/user/update")
+    @PUT("/update_profile")
     suspend fun updateProfile(
         @Body updateProfileData: UpdateProfileData
     )

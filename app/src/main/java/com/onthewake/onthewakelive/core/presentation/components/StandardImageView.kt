@@ -2,7 +2,6 @@ package com.onthewake.onthewakelive.core.presentation.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.onthewake.onthewakelive.R
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun StandardImageView(
-    imageLoader: ImageLoader,
     model: String,
     onUserAvatarClicked: (String) -> Unit
 ) {
@@ -50,7 +47,7 @@ fun StandardImageView(
                     modifier = Modifier.size(26.dp),
                     strokeWidth = 2.dp
                 )
-                Image(
+                AsyncImage(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
@@ -59,14 +56,11 @@ fun StandardImageView(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         ),
-                    painter = rememberAsyncImagePainter(
-                        model = model,
-                        imageLoader = imageLoader,
-                        onLoading = { isImageLoading = true },
-                        onError = { isImageLoading = false },
-                        onSuccess = { isImageLoading = false }
-                    ),
-                    contentDescription = stringResource(id = R.string.user_picture)
+                    model = model,
+                    contentDescription = stringResource(id = R.string.user_picture),
+                    onLoading = { isImageLoading = true },
+                    onError = { isImageLoading = false },
+                    onSuccess = { isImageLoading = false }
                 )
             }
         }

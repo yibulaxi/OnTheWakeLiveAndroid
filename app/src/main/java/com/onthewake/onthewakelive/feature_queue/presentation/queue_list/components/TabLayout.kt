@@ -43,11 +43,11 @@ fun TabLayout(pagerState: PagerState) {
         },
         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
     ) {
-        list.forEachIndexed { index, _ ->
+        list.forEachIndexed { index, item ->
             Tab(
                 icon = {
                     Icon(
-                        imageVector = list[index].second,
+                        imageVector = item.second,
                         contentDescription = null,
                         tint = if (pagerState.currentPage == index)
                             MaterialTheme.colorScheme.onSecondaryContainer
@@ -56,7 +56,7 @@ fun TabLayout(pagerState: PagerState) {
                 },
                 text = {
                     Text(
-                        text = list[index].first,
+                        text = item.first,
                         color = if (pagerState.currentPage == index)
                             MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurfaceVariant
