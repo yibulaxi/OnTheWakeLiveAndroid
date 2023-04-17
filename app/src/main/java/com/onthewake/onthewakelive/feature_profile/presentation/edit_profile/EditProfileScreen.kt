@@ -40,6 +40,7 @@ import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.CropActivityResultContract
 import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.*
 import kotlinx.coroutines.flow.collectLatest
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,9 +88,16 @@ fun EditProfileScreen(
 
     CalendarDialog(
         state = calendarState,
-        config = CalendarConfig(monthSelection = true, yearSelection = true),
-        selection = CalendarSelection.Date { date ->
-            viewModel.onEvent(EditProfileDateOfBirthChanged(date.format(formatter)))
+        config = CalendarConfig(
+            monthSelection = true,
+            yearSelection = true,
+            boundary = LocalDate.of(1960, 1, 1)
+                    ..LocalDate.now().minusYears(6L)
+        ),
+        selection = CalendarSelection.Date(
+            selectedDate = LocalDate.of(2000, 1, 1)
+        ) { date ->
+            viewModel.onEvent(DateOfBirthChanged(date.format(formatter)))
         }
     )
 
@@ -171,7 +179,7 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(30.dp))
             StandardTextField(
                 value = state.firstName,
-                onValueChange = { viewModel.onEvent(EditProfileFirstNameChanged(it)) },
+                onValueChange = { viewModel.onEvent(FirstNameChanged(it)) },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
@@ -182,7 +190,7 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
             StandardTextField(
                 value = state.lastName,
-                onValueChange = { viewModel.onEvent(EditProfileLastNameChanged(it)) },
+                onValueChange = { viewModel.onEvent(LastNameChanged(it)) },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
@@ -193,7 +201,7 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
             StandardTextField(
                 value = state.phoneNumber,
-                onValueChange = { viewModel.onEvent(EditProfilePhoneNumberChanged(it)) },
+                onValueChange = { viewModel.onEvent(PhoneNumberChanged(it)) },
                 label = stringResource(id = R.string.phone_number),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -204,13 +212,13 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
             StandardTextField(
                 value = state.telegram,
-                onValueChange = { viewModel.onEvent(EditProfileTelegramChanged(it)) },
+                onValueChange = { viewModel.onEvent(TelegramChanged(it)) },
                 label = stringResource(id = R.string.telegram)
             )
             Spacer(modifier = Modifier.height(16.dp))
             StandardTextField(
                 value = state.instagram,
-                onValueChange = { viewModel.onEvent(EditProfileInstagramChanged(it)) },
+                onValueChange = { viewModel.onEvent(InstagramChanged(it)) },
                 label = stringResource(id = R.string.instagram)
             )
             Spacer(modifier = Modifier.height(16.dp))

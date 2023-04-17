@@ -42,22 +42,22 @@ class EditProfileViewModel @Inject constructor(
 
     fun onEvent(event: EditProfileUiEvent) {
         when (event) {
-            is EditProfileUiEvent.EditProfileFirstNameChanged -> {
+            is EditProfileUiEvent.FirstNameChanged -> {
                 _state.value = state.value.copy(firstName = event.value)
             }
-            is EditProfileUiEvent.EditProfileLastNameChanged -> {
+            is EditProfileUiEvent.LastNameChanged -> {
                 _state.value = state.value.copy(lastName = event.value)
             }
-            is EditProfileUiEvent.EditProfilePhoneNumberChanged -> {
+            is EditProfileUiEvent.PhoneNumberChanged -> {
                 _state.value = state.value.copy(phoneNumber = event.value)
             }
-            is EditProfileUiEvent.EditProfileTelegramChanged -> {
+            is EditProfileUiEvent.TelegramChanged -> {
                 _state.value = state.value.copy(telegram = event.value)
             }
-            is EditProfileUiEvent.EditProfileInstagramChanged -> {
+            is EditProfileUiEvent.InstagramChanged -> {
                 _state.value = state.value.copy(instagram = event.value)
             }
-            is EditProfileUiEvent.EditProfileDateOfBirthChanged -> {
+            is EditProfileUiEvent.DateOfBirthChanged -> {
                 _state.value = state.value.copy(dateOfBirth = event.value)
             }
             is EditProfileUiEvent.CropImage -> {

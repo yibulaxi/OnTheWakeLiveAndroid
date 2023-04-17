@@ -51,11 +51,7 @@ class QueueSocketServiceImpl(private val client: HttpClient) : QueueSocketServic
         .incoming
         .consumeAsFlow()
         .filterIsInstance<Frame.Text>()
-        .mapNotNull {
-            val result = Json.decodeFromString<QueueSocketResponse>(it.readText())
-            println("observeQueue QueueSocketServiceImpl $result")
-            result
-        }
+        .mapNotNull { Json.decodeFromString<QueueSocketResponse>(it.readText()) }
 
     override suspend fun joinTheQueue(
         line: Line, firstName: String?
