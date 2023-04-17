@@ -91,11 +91,11 @@ fun EditProfileScreen(
         config = CalendarConfig(
             monthSelection = true,
             yearSelection = true,
-            boundary = LocalDate.of(1960, 1, 1)
+            boundary = LocalDate.now().minusYears(60L)
                     ..LocalDate.now().minusYears(6L)
         ),
         selection = CalendarSelection.Date(
-            selectedDate = LocalDate.of(2000, 1, 1)
+            selectedDate = LocalDate.now().minusYears(18L)
         ) { date ->
             viewModel.onEvent(DateOfBirthChanged(date.format(formatter)))
         }
