@@ -1,7 +1,9 @@
 package com.onthewake.onthewakelive.feature_queue.data.repository
 
+import android.content.SharedPreferences
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
+import com.onthewake.onthewakelive.core.utils.Constants
 import com.onthewake.onthewakelive.core.utils.Constants.WS_BASE_URL
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.core.utils.SimpleResource
@@ -9,6 +11,7 @@ import com.onthewake.onthewakelive.core.utils.handleNetworkError
 import com.onthewake.onthewakelive.feature_queue.data.remote.model.QueueSocketMessage
 import com.onthewake.onthewakelive.feature_queue.domain.module.Action
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
+import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 import com.onthewake.onthewakelive.feature_queue.domain.module.QueueSocketResponse
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketService
 import io.ktor.client.HttpClient
@@ -30,7 +33,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-class QueueSocketServiceImpl(private val client: HttpClient) : QueueSocketService {
+class QueueSocketServiceImpl(
+    private val client: HttpClient,
+    private val sharedPreferences: SharedPreferences
+) : QueueSocketService {
     private var socket: WebSocketSession? = null
 
     override suspend fun initSession(): SimpleResource = withContext(Dispatchers.IO) {
@@ -52,6 +58,36 @@ class QueueSocketServiceImpl(private val client: HttpClient) : QueueSocketServic
         .consumeAsFlow()
         .filterIsInstance<Frame.Text>()
         .mapNotNull { Json.decodeFromString<QueueSocketResponse>(it.readText()) }
+
+    override fun canJoinTheQueue(line: Line, queue: List<QueueItem>): SimpleResource {
+        val userId = sharedPreferences.getString(Constants.PREFS_USER_ID, null)
+
+        val leftQueue = queue.filter { it.line == Line.LEFT }
+        val rightQueue = queue.filter { it.line == Line.RIGHT }
+
+        val isUserAlreadyInQueue = queue.find { it.userId == userId } != null
+        val userItemInLeftQueue = leftQueue.find { it.userId == userId }
+        val userItemInRightQueue = rightQueue.find { it.userId == userId }
+
+        val userPositionInLeftQueue = leftQueue.indexOf(userItemInLeftQueue)
+        val userPositionInRightQueue = rightQueue.indexOf(userItemInRightQueue)
+
+        return if (userId in Constants.ADMIN_IDS) Resource.Success(Unit)
+        else if (!isUserAlreadyInQueue) Resource.Success(Unit)
+        else if (line == Line.LEFT && userItemInLeftQueue != null)
+            Resource.Error(UIText.StringResource(R.string.already_in_queue_error))
+        else if (line == Line.RIGHT && userItemInRightQueue != null)
+            Resource.Error(UIText.StringResource(R.string.already_in_queue_error))
+        else if (line == Line.LEFT && userItemInRightQueue != null) {
+            if (leftQueue.size - userPositionInRightQueue >= 4) Resource.Success(Unit)
+            else if (userPositionInRightQueue - leftQueue.size >= 4) Resource.Success(Unit)
+            else Resource.Error(UIText.StringResource(R.string.interval_error))
+        } else if (line == Line.RIGHT && userItemInLeftQueue != null) {
+            if (rightQueue.size - userPositionInLeftQueue >= 4) Resource.Success(Unit)
+            else if (userPositionInLeftQueue - rightQueue.size >= 4) Resource.Success(Unit)
+            else Resource.Error(UIText.StringResource(R.string.interval_error))
+        } else Resource.Error(UIText.StringResource(R.string.unknown_error))
+    }
 
     override suspend fun joinTheQueue(
         line: Line, firstName: String?

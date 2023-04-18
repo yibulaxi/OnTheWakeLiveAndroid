@@ -2,6 +2,7 @@ package com.onthewake.onthewakelive.feature_auth.presentation.auth_login
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.AuthRequest
@@ -28,33 +29,33 @@ class LoginViewModel @Inject constructor(
 
     fun onEvent(event: LoginEvent) {
         when (event) {
-            is LoginEvent.SignInPhoneNumberChanged -> _state.value = state.value.copy(
-                signInPhoneNumber = event.value
-            )
-            is LoginEvent.SignInPasswordChanged -> _state.value = state.value.copy(
-                signInPassword = event.value
+            is LoginEvent.PhoneNumberChange -> if (event.value.isDigitsOnly()) {
+                _state.value = state.value.copy(phoneNumber = event.value)
+            }
+            is LoginEvent.PasswordChanged -> _state.value = state.value.copy(
+                password = event.value
             )
             is LoginEvent.SignIn -> signIn()
         }
     }
 
     private fun signIn() {
-        val phoneNumberResult = validationUseCase.validatePhoneNumber(state.value.signInPhoneNumber)
-        val passwordResult = validationUseCase.validatePassword(state.value.signInPassword)
+        val phoneNumberResult = validationUseCase.validatePhoneNumber(state.value.phoneNumber)
+        val passwordResult = validationUseCase.validatePassword(state.value.password)
 
         val hasError = listOf(phoneNumberResult, passwordResult).any { !it.successful }
 
         if (hasError) {
             _state.value = state.value.copy(
-                signInPhoneNumberError = phoneNumberResult.errorMessage,
-                signInPasswordError = passwordResult.errorMessage
+                phoneNumberError = phoneNumberResult.errorMessage,
+                passwordError = passwordResult.errorMessage
             )
             return
         }
 
         _state.value = state.value.copy(
-            signInPhoneNumberError = null,
-            signInPasswordError = null
+            phoneNumberError = null,
+            passwordError = null
         )
 
         viewModelScope.launch {
@@ -62,8 +63,8 @@ class LoginViewModel @Inject constructor(
 
             val result = repository.signIn(
                 AuthRequest(
-                    phoneNumber = state.value.signInPhoneNumber.trim(),
-                    password = state.value.signInPassword.trim()
+                    phoneNumber = state.value.phoneNumber.trim(),
+                    password = state.value.password.trim()
                 )
             )
             _authResult.emit(result)

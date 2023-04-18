@@ -53,12 +53,10 @@ fun QueueScreen(
     navController: NavHostController
 ) {
     val state = viewModel.state.value
-    val userId = viewModel.userId
+    var showLeaveQueueDialog = viewModel.showLeaveQueueDialog
 
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-
-    var showLeaveQueueDialog by remember { mutableStateOf(false to "") }
 
     val pagerState = rememberPagerState(initialPage = 1)
     val snackBarHostState = remember { SnackbarHostState() }
@@ -88,14 +86,14 @@ fun QueueScreen(
         }
     }
 
-    if (showLeaveQueueDialog.first) LeaveQueueConfirmationDialog(
+    if (viewModel.showLeaveQueueDialog.first) LeaveQueueConfirmationDialog(
         showDialog = { showLeaveQueueDialog = showLeaveQueueDialog.copy(first = it) },
-        isUserAdmin = viewModel.userId.isUserAdmin(),
-        onLeaveQueue = { viewModel.leaveTheQueue(showLeaveQueueDialog.second) }
+        isUserAdmin = state.userId.isUserAdmin(),
+        onLeaveQueue = viewModel::leaveTheQueue
     )
 
-    if (viewModel.showDialog) AdminDialog(
-        showDialog = { viewModel.showDialog = it },
+    if (viewModel.showAdminDialog) AdminDialog(
+        showDialog = { viewModel.showAdminDialog = it },
         queue = state.queue,
         onAddClicked = { line, firstName ->
             viewModel.joinTheQueue(line = line, firstName = firstName)
@@ -126,7 +124,7 @@ fun QueueScreen(
                     }
 
                     if (hasNotificationPermission) {
-                        if (userId.isUserAdmin()) viewModel.showDialog = true
+                        if (state.userId.isUserAdmin()) viewModel.showAdminDialog = true
                         else viewModel.joinTheQueue(
                             line = if (pagerState.currentPage == 0) Line.LEFT else Line.RIGHT
                         )
@@ -165,10 +163,9 @@ fun QueueScreen(
                             val leftQueue = remember(state.queue) {
                                 state.queue.filter { it.line == Line.LEFT }
                             }
-
                             QueueContent(
                                 queue = leftQueue,
-                                userId = userId,
+                                userId = state.userId,
                                 onDetailsClicked = { queueItemId ->
                                     navController.navigate(
                                         Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
@@ -190,10 +187,9 @@ fun QueueScreen(
                             val rightQueue = remember(state.queue) {
                                 state.queue.filter { it.line == Line.RIGHT }
                             }
-
                             QueueContent(
                                 queue = rightQueue,
-                                userId = userId,
+                                userId = state.userId,
                                 onDetailsClicked = { queueItemId ->
                                     navController.navigate(
                                         Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)

@@ -88,53 +88,53 @@ fun RegisterScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 50.dp)
+                    .padding(bottom = 180.dp)
                     .align(Alignment.Center),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = stringResource(id = R.string.sign_up),
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
-                    value = state.signUpFirstName,
-                    onValueChange = { viewModel.onEvent(SignUpFirstNameChanged(it)) },
+                    value = state.firstName,
+                    onValueChange = { viewModel.onEvent(FirstNameChanged(it)) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     label = stringResource(id = R.string.first_name),
-                    errorText = state.signUpFirstNameError
+                    errorText = state.firstNameError
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
-                    value = state.signUpLastName,
-                    onValueChange = { viewModel.onEvent(SignUpLastNameChanged(it)) },
+                    value = state.lastName,
+                    onValueChange = { viewModel.onEvent(LastNameChanged(it)) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     label = stringResource(id = R.string.last_name),
-                    errorText = state.signUpLastNameError
+                    errorText = state.lastNameError
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
-                    value = state.signUpPhoneNumber,
-                    onValueChange = { viewModel.onEvent(SignUpPhoneNumberChanged(it)) },
+                    value = state.phoneNumber,
+                    onValueChange = { viewModel.onEvent(PhoneNumberChanged(it)) },
                     label = stringResource(id = R.string.phone_number),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Phone,
                         imeAction = ImeAction.Next
                     ),
-                    errorText = state.signUpPhoneNumberError
+                    errorText = state.phoneNumberError,
+                    isPhoneNumberTextField = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
-                    value = state.signUpPassword,
-                    onValueChange = { viewModel.onEvent(SignUpPasswordChanged(it)) },
+                    value = state.password,
+                    onValueChange = { viewModel.onEvent(PasswordChanged(it)) },
                     label = stringResource(id = R.string.password),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -147,7 +147,7 @@ fun RegisterScreen(
                         }
                     ),
                     isPasswordTextField = true,
-                    errorText = state.signUpPasswordError
+                    errorText = state.passwordError
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(

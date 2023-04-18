@@ -163,17 +163,6 @@ fun EditProfileScreen(
                         model = profilePictureUri ?: state.profilePictureUri,
                         contentDescription = stringResource(id = R.string.user_picture)
                     )
-//                    Image(
-//                        modifier = Modifier.fillMaxSize(),
-//                        painter = rememberAsyncImagePainter(
-//                            model = profilePictureUri ?: state.profilePictureUri,
-//                            imageLoader = imageLoader,
-//                            onLoading = { isImageLoading.value = true },
-//                            onError = { isImageLoading.value = false },
-//                            onSuccess = { isImageLoading.value = false }
-//                        ),
-//                        contentDescription = stringResource(id = R.string.user_picture)
-//                    )
                 }
             }
             Spacer(modifier = Modifier.height(30.dp))
@@ -207,7 +196,8 @@ fun EditProfileScreen(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 ),
-                errorText = state.profilePhoneNumberError
+                errorText = state.profilePhoneNumberError,
+                isPhoneNumberTextField = true
             )
             Spacer(modifier = Modifier.height(16.dp))
             StandardTextField(

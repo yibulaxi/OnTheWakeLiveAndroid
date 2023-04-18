@@ -25,8 +25,7 @@ fun Context.openNotificationSettings() {
     Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         putExtra(
-            "android.provider.extra.APP_PACKAGE",
-            this@openNotificationSettings.packageName
+            "android.provider.extra.APP_PACKAGE", this@openNotificationSettings.packageName
         )
         this@openNotificationSettings.startActivity(this)
     }
@@ -39,8 +38,11 @@ fun handleNetworkError(exception: Exception): UIText = when (exception) {
         500 -> UIText.StringResource(R.string.server_error)
         else -> UIText.StringResource(R.string.unknown_error)
     }
+
     is IOException -> UIText.StringResource(R.string.server_error)
     else -> UIText.StringResource(R.string.unknown_error)
 }
 
 fun String?.isUserAdmin(): Boolean = this in ADMIN_IDS
+
+fun String.addPlusPrefix(): String = "+$this"

@@ -1,14 +1,26 @@
 package com.onthewake.onthewakelive.feature_auth.presentation.auth_login
 
-import android.annotation.SuppressLint
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -28,11 +40,11 @@ import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
-import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.*
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.SignIn
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.PasswordChanged
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.PhoneNumberChange
 import com.onthewake.onthewakelive.navigation.Screen
 
-@OptIn(ExperimentalAnimationApi::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
@@ -79,31 +91,31 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(bottom = 80.dp)
+                    .padding(bottom = 140.dp)
                     .align(Alignment.Center),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = stringResource(id = R.string.sign_in),
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
-                    value = state.signInPhoneNumber,
-                    onValueChange = { viewModel.onEvent(SignInPhoneNumberChanged(it)) },
+                    value = state.phoneNumber,
+                    onValueChange = { viewModel.onEvent(PhoneNumberChange(it)) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Phone,
                         imeAction = ImeAction.Next
                     ),
                     label = stringResource(id = R.string.phone_number),
-                    errorText = state.signInPhoneNumberError,
+                    errorText = state.phoneNumberError,
+                    isPhoneNumberTextField = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
-                    value = state.signInPassword,
-                    onValueChange = { viewModel.onEvent(SignInPasswordChanged(it)) },
+                    value = state.password,
+                    onValueChange = { viewModel.onEvent(PasswordChanged(it)) },
                     label = stringResource(id = R.string.password),
                     isPasswordTextField = true,
                     keyboardOptions = KeyboardOptions(
@@ -117,7 +129,7 @@ fun LoginScreen(
                             focusManager.clearFocus()
                         }
                     ),
-                    errorText = state.signInPasswordError,
+                    errorText = state.passwordError
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(

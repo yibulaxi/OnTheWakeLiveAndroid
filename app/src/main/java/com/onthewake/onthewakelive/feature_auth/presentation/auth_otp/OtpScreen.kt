@@ -1,15 +1,30 @@
 package com.onthewake.onthewakelive.feature_auth.presentation.auth_otp
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -24,6 +39,7 @@ import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.core.presentation.components.StandardTopBar
+import com.onthewake.onthewakelive.core.utils.addPlusPrefix
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.delay
@@ -38,6 +54,7 @@ fun OtpScreen(
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -57,9 +74,14 @@ fun OtpScreen(
         }
     }
 
+    LaunchedEffect(key1 = true) {
+        focusRequester.requestFocus()
+    }
+
     AnimatedScaffold(
         isLoading = state.isLoading,
-        topBar = { StandardTopBar(onBackClicked = navController::popBackStack) }
+        topBar = { StandardTopBar(onBackClicked = navController::popBackStack) },
+        snackBarHost = { SnackbarHost(hostState = snackBarHostState) }
     ) {
         Box(
             modifier = Modifier
@@ -77,12 +99,14 @@ fun OtpScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.code_has_been_sent_to) + state.signUpPhoneNumber,
+                    text = stringResource(R.string.code_has_been_sent_to) +
+                            state.signUpPhoneNumber.addPlusPrefix(),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 StandardTextField(
+                    modifier = Modifier.focusRequester(focusRequester),
                     value = state.otp,
                     onValueChange = {
                         if (it.length <= 6) viewModel.onEvent(OtpEvent.OtpChanged(it))

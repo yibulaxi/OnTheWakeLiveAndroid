@@ -3,6 +3,7 @@ package com.onthewake.onthewakelive.feature_profile.presentation.edit_profile
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.R
@@ -42,24 +43,24 @@ class EditProfileViewModel @Inject constructor(
 
     fun onEvent(event: EditProfileUiEvent) {
         when (event) {
-            is EditProfileUiEvent.FirstNameChanged -> {
-                _state.value = state.value.copy(firstName = event.value)
-            }
-            is EditProfileUiEvent.LastNameChanged -> {
-                _state.value = state.value.copy(lastName = event.value)
-            }
-            is EditProfileUiEvent.PhoneNumberChanged -> {
+            is EditProfileUiEvent.FirstNameChanged -> _state.value = state.value.copy(
+                firstName = event.value
+            )
+            is EditProfileUiEvent.LastNameChanged -> _state.value = state.value.copy(
+                lastName = event.value
+            )
+            is EditProfileUiEvent.PhoneNumberChanged -> if (event.value.isDigitsOnly()) {
                 _state.value = state.value.copy(phoneNumber = event.value)
             }
-            is EditProfileUiEvent.TelegramChanged -> {
-                _state.value = state.value.copy(telegram = event.value)
-            }
-            is EditProfileUiEvent.InstagramChanged -> {
-                _state.value = state.value.copy(instagram = event.value)
-            }
-            is EditProfileUiEvent.DateOfBirthChanged -> {
-                _state.value = state.value.copy(dateOfBirth = event.value)
-            }
+            is EditProfileUiEvent.TelegramChanged -> _state.value = state.value.copy(
+                telegram = event.value
+            )
+            is EditProfileUiEvent.InstagramChanged -> _state.value = state.value.copy(
+                instagram = event.value
+            )
+            is EditProfileUiEvent.DateOfBirthChanged -> _state.value = state.value.copy(
+                dateOfBirth = event.value
+            )
             is EditProfileUiEvent.CropImage -> {
                 _selectedProfilePictureUri.value = event.uri
                 _state.value = state.value.copy(profilePictureUri = event.uri.toString())
@@ -84,6 +85,7 @@ class EditProfileViewModel @Inject constructor(
                         profilePictureUri = profile.profilePictureUri
                     )
                 }
+
                 is Resource.Error -> _snackBarEvent.emit(result.message)
             }
             _state.value = state.value.copy(isLoading = false)
@@ -108,7 +110,8 @@ class EditProfileViewModel @Inject constructor(
                 profilePhoneNumberError = phoneNumberResult.errorMessage
             )
             return
-        } else _state.value = state.value.copy(
+        }
+        _state.value = state.value.copy(
             profileFirsNameError = null,
             profileLastNameError = null,
             profilePhoneNumberError = null
@@ -138,6 +141,7 @@ class EditProfileViewModel @Inject constructor(
                 is Resource.Success -> _snackBarEvent.emit(
                     UIText.StringResource(R.string.successfully_updated_profile)
                 )
+
                 is Resource.Error -> _snackBarEvent.emit(result.message)
             }
         }

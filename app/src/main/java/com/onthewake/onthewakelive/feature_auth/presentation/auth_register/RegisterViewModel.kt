@@ -3,10 +3,12 @@ package com.onthewake.onthewakelive.feature_auth.presentation.auth_register
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.core.utils.Resource
+import com.onthewake.onthewakelive.core.utils.addPlusPrefix
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
 import com.onthewake.onthewakelive.feature_auth.domain.use_case.ValidationUseCase
@@ -27,38 +29,42 @@ class RegisterViewModel @Inject constructor(
     private val _state = mutableStateOf(RegisterState())
     val state: State<RegisterState> = _state
 
-    private val _snackBarEvent = MutableSharedFlow<UIText>()
-    val snackBarEvent = _snackBarEvent.asSharedFlow()
-
     private val _authResult = MutableSharedFlow<AuthResult>()
     val authResult = _authResult.asSharedFlow()
+
+    private val _snackBarEvent = MutableSharedFlow<UIText>()
+    val snackBarEvent = _snackBarEvent.asSharedFlow()
 
     private val _navigateUpEvent = MutableSharedFlow<String>()
     val navigateUpEvent = _navigateUpEvent.asSharedFlow()
 
     fun onEvent(event: RegisterEvent) {
         when (event) {
-            is RegisterEvent.SignUpFirstNameChanged -> _state.value = state.value.copy(
-                signUpFirstName = event.value
+            is RegisterEvent.FirstNameChanged -> _state.value = state.value.copy(
+                firstName = event.value
             )
-            is RegisterEvent.SignUpLastNameChanged -> _state.value = state.value.copy(
-                signUpLastName = event.value
+
+            is RegisterEvent.LastNameChanged -> _state.value = state.value.copy(
+                lastName = event.value
             )
-            is RegisterEvent.SignUpPhoneNumberChanged -> _state.value = state.value.copy(
-                signUpPhoneNumber = event.value
+
+            is RegisterEvent.PhoneNumberChanged -> if (event.value.isDigitsOnly()) {
+                _state.value = state.value.copy(phoneNumber = event.value)
+            }
+
+            is RegisterEvent.PasswordChanged -> _state.value = state.value.copy(
+                password = event.value
             )
-            is RegisterEvent.SignUpPasswordChanged -> _state.value = state.value.copy(
-                signUpPassword = event.value
-            )
+
             is RegisterEvent.SendOtp -> sendOtp(context = event.context)
         }
     }
 
     private fun sendOtp(context: Context) {
-        val firstName = state.value.signUpFirstName.trim()
-        val lastName = state.value.signUpLastName.trim()
-        val phoneNumber = state.value.signUpPhoneNumber.trim()
-        val password = state.value.signUpPassword.trim()
+        val firstName = state.value.firstName.trim()
+        val lastName = state.value.lastName.trim()
+        val phoneNumber = state.value.phoneNumber.trim()
+        val password = state.value.password.trim()
 
         val firstNameResult = validationUseCase.validateFirstName(firstName)
         val lastNameResult = validationUseCase.validateLastName(lastName)
@@ -74,17 +80,18 @@ class RegisterViewModel @Inject constructor(
 
         if (hasError) {
             _state.value = state.value.copy(
-                signUpFirstNameError = firstNameResult.errorMessage,
-                signUpLastNameError = lastNameResult.errorMessage,
-                signUpPhoneNumberError = phoneNumberResult.errorMessage,
-                signUpPasswordError = passwordResult.errorMessage
+                firstNameError = firstNameResult.errorMessage,
+                lastNameError = lastNameResult.errorMessage,
+                phoneNumberError = phoneNumberResult.errorMessage,
+                passwordError = passwordResult.errorMessage
             )
             return
-        } else _state.value = state.value.copy(
-            signUpFirstNameError = null,
-            signUpLastNameError = null,
-            signUpPhoneNumberError = null,
-            signUpPasswordError = null
+        }
+        _state.value = state.value.copy(
+            firstNameError = null,
+            lastNameError = null,
+            phoneNumberError = null,
+            passwordError = null
         )
 
         viewModelScope.launch {
@@ -98,11 +105,12 @@ class RegisterViewModel @Inject constructor(
                         return@launch
                     }
                 }
+
                 is Resource.Error -> _snackBarEvent.emit(isUserAlreadyExists.message)
             }
 
             val result = repository.sendOtp(
-                phoneNumber = phoneNumber,
+                phoneNumber = phoneNumber.addPlusPrefix(),
                 isResendAction = false,
                 context = context
             )

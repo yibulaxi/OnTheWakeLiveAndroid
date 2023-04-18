@@ -33,9 +33,7 @@ object QueueModule {
     @Singleton
     fun provideHttpClient(prefs: SharedPreferences): HttpClient = HttpClient(CIO) {
         install(Logging)
-        install(WebSockets) {
-
-        }
+        install(WebSockets)
         install(ContentNegotiation) { json() }
         install(DefaultRequest) {
             val token = prefs.getString(Constants.PREFS_JWT_TOKEN, null)
@@ -59,6 +57,11 @@ object QueueModule {
         QueueServiceImpl(queueApi = queueApi)
 
     @Provides
-    fun provideQueueSocketService(client: HttpClient): QueueSocketService =
-        QueueSocketServiceImpl(client = client)
+    fun provideQueueSocketService(
+        client: HttpClient,
+        sharedPreferences: SharedPreferences
+    ): QueueSocketService = QueueSocketServiceImpl(
+        client = client,
+        sharedPreferences = sharedPreferences
+    )
 }

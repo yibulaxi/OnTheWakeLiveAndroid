@@ -29,6 +29,7 @@ import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
+import com.onthewake.onthewakelive.core.utils.addPlusPrefix
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.navigation.Screen
 
@@ -173,7 +174,7 @@ fun ProfileScreen(
                 )
                 UserDataItem(
                     title = stringResource(id = R.string.phone_number),
-                    subtitle = state.phoneNumber
+                    subtitle = state.phoneNumber.addPlusPrefix()
                 )
                 UserDataItem(
                     title = stringResource(id = R.string.date_of_birth),

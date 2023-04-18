@@ -24,7 +24,8 @@ object UserProfileSerializer : Serializer<Profile> {
 
     override suspend fun readFrom(input: InputStream): Profile = try {
         Json.decodeFromString(
-            deserializer = Profile.serializer(), string = input.readBytes().decodeToString()
+            deserializer = Profile.serializer(),
+            string = input.readBytes().decodeToString()
         )
     } catch (e: SerializationException) {
         defaultValue
@@ -33,8 +34,10 @@ object UserProfileSerializer : Serializer<Profile> {
     override suspend fun writeTo(t: Profile, output: OutputStream) {
         withContext(Dispatchers.IO) {
             output.write(
-                Json.encodeToString(serializer = Profile.serializer(), value = t)
-                    .encodeToByteArray()
+                Json.encodeToString(
+                    serializer = Profile.serializer(),
+                    value = t
+                ).encodeToByteArray()
             )
         }
     }
