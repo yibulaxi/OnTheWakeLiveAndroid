@@ -23,14 +23,14 @@ class QueueItemDetailsViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<String>(DETAILS_ARGUMENT_KEY)?.let { queueItemId ->
-            loadQueueItemDetails(queueItemId)
+            getQueueItemDetails(queueItemId)
         }
     }
 
-    private fun loadQueueItemDetails(queueItemId: String) {
+    private fun getQueueItemDetails(queueItemId: String) {
         viewModelScope.launch {
             _state.value = state.value.copy(isLoading = true)
-            when (val result = queueService.getProfileDetails(queueItemId)) {
+            when (val result = queueService.getQueueItemDetails(queueItemId)) {
                 is Resource.Success -> {
                     result.data?.let {
                         _state.value = state.value.copy(

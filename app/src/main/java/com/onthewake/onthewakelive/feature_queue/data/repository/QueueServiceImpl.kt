@@ -24,7 +24,7 @@ class QueueServiceImpl(
         }
     }
 
-    override suspend fun getProfileDetails(queueItemId: String): Resource<Profile> {
+    override suspend fun getQueueItemDetails(queueItemId: String): Resource<Profile> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = queueApi.getProfileDetails(queueItemId = queueItemId)

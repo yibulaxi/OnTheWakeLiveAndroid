@@ -17,7 +17,7 @@ import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.Edi
 import com.onthewake.onthewakelive.feature_profile.presentation.profile.ProfileScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_details.QueueItemDetailsScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.QueueScreen
-import com.onthewake.onthewakelive.feature_splash.presentation.ServerUnavailableScreen
+import com.onthewake.onthewakelive.feature_splash.presentation.components.ServerUnavailableScreen
 
 @Composable
 fun SetupNavGraph(

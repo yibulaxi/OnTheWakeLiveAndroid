@@ -1,4 +1,4 @@
-package com.onthewake.onthewakelive.feature_splash.presentation
+package com.onthewake.onthewakelive.feature_splash.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

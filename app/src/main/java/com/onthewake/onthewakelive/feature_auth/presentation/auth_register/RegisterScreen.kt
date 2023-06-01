@@ -1,10 +1,22 @@
 package com.onthewake.onthewakelive.feature_auth.presentation.auth_register
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -27,7 +39,11 @@ import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
-import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.*
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.FirstNameChanged
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.LastNameChanged
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.PasswordChanged
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.PhoneNumberChanged
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.SendOtp
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 
@@ -79,16 +95,16 @@ fun RegisterScreen(
     AnimatedScaffold(
         isLoading = state.isLoading,
         snackBarHost = { SnackbarHost(hostState = snackBarHostState) }
-    ) {
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .padding(all = 24.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 180.dp)
                     .align(Alignment.Center),
                 verticalArrangement = Arrangement.Center
             ) {
