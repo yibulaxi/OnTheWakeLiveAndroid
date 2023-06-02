@@ -2,9 +2,7 @@ package com.onthewake.onthewakelive.feature_queue.presentation.queue_list
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
@@ -28,9 +26,6 @@ class QueueViewModel @Inject constructor(
 
     private val _state = mutableStateOf(QueueState())
     val state: State<QueueState> = _state
-
-    var showAdminDialog by mutableStateOf(false)
-    var showLeaveQueueDialog by mutableStateOf(false to "")
 
     init {
         if (!queueSocketService.isConnectionEstablished()) connectToQueue()
@@ -82,6 +77,8 @@ class QueueViewModel @Inject constructor(
     }
 
     fun joinTheQueue(line: Line, firstName: String? = null) {
+        _state.value = state.value.copy(showLeaveQueueDialog = false)
+
         val canJoinTheQueue = queueSocketService.canJoinTheQueue(
             line = line, queue = state.value.queue
         )
@@ -103,11 +100,25 @@ class QueueViewModel @Inject constructor(
         _state.value = state.value.copy(userId = userId)
     }
 
+    fun onSwipedToDelete(queueItemIdToDelete: String) {
+        _state.value = state.value.copy(
+            showLeaveQueueDialog = true,
+            queueItemIdToDelete = queueItemIdToDelete
+        )
+    }
+
+    fun hideLeaveQueueDialog() {
+        _state.value = state.value.copy(showLeaveQueueDialog = false)
+    }
+
     fun leaveTheQueue() {
+        val queueItemIdToDelete = state.value.queueItemIdToDelete ?: return
         viewModelScope.launch {
-            queueSocketService.leaveTheQueue(
-                queueItemId = showLeaveQueueDialog.second
-            )
+            queueSocketService.leaveTheQueue(queueItemId = queueItemIdToDelete)
         }
+    }
+
+    fun toggleAdminDialog() {
+        _state.value = state.value.copy(showAdminDialog = !state.value.showAdminDialog)
     }
 }

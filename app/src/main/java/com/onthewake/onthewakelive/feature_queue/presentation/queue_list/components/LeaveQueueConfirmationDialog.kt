@@ -9,12 +9,12 @@ import com.onthewake.onthewakelive.R
 
 @Composable
 fun LeaveQueueConfirmationDialog(
-    showDialog: (Boolean) -> Unit,
+    onDismissRequest: () -> Unit,
     isUserAdmin: Boolean,
     onLeaveQueue: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = { showDialog(false) },
+        onDismissRequest = onDismissRequest,
         title = { Text(text = stringResource(R.string.confirm_action)) },
         text = {
             Text(
@@ -26,7 +26,7 @@ fun LeaveQueueConfirmationDialog(
             TextButton(
                 onClick = {
                     onLeaveQueue()
-                    showDialog(false)
+                    onDismissRequest()
                 }
             ) {
                 Text(
@@ -36,7 +36,7 @@ fun LeaveQueueConfirmationDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = { showDialog(false) }) {
+            TextButton(onClick = onDismissRequest) {
                 Text(
                     text = if (isUserAdmin) stringResource(R.string.cancel)
                     else stringResource(R.string.stay)

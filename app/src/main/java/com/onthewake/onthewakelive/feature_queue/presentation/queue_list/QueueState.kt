@@ -6,6 +6,9 @@ import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 data class QueueState(
     val userId: String? = null,
     val queue: List<QueueItem> = emptyList(),
-    var isQueueLoading: Boolean = false,
-    var error: UIText? = null
+    val isQueueLoading: Boolean = false,
+    val showLeaveQueueDialog: Boolean = false,
+    val queueItemIdToDelete: String? = null,
+    val showAdminDialog: Boolean = false,
+    val error: UIText? = null
 )
