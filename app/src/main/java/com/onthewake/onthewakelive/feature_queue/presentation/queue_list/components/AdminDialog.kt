@@ -52,17 +52,22 @@ fun AdminDialog(
     var firstNameFieldState by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
 
-    val rightButtonColor = if (line == Line.RIGHT) MaterialTheme.colorScheme.primaryContainer
-    else MaterialTheme.colorScheme.onPrimaryContainer
-    val leftButtonColor = if (line == Line.LEFT) MaterialTheme.colorScheme.primaryContainer
-    else MaterialTheme.colorScheme.onPrimaryContainer
+    val rightButtonColor = if (line == Line.RIGHT) MaterialTheme.colorScheme.onPrimaryContainer
+    else MaterialTheme.colorScheme.primaryContainer
+    val leftButtonColor = if (line == Line.LEFT) MaterialTheme.colorScheme.onPrimaryContainer
+    else MaterialTheme.colorScheme.primaryContainer
 
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             shape = AlertDialogDefaults.shape,
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
         ) {
-            Column(modifier = Modifier.padding(14.dp)) {
+            Column(
+                modifier = Modifier
+                    .height(330.dp)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(id = R.string.add_to_queue),
@@ -72,11 +77,9 @@ fun AdminDialog(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
+                        modifier = Modifier.weight(1f),
                         onClick = { line = Line.LEFT },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = leftButtonColor,
@@ -95,6 +98,7 @@ fun AdminDialog(
                     }
                     Spacer(modifier = Modifier.width(20.dp))
                     Button(
+                        modifier = Modifier.weight(1f),
                         onClick = { line = Line.RIGHT },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = rightButtonColor,

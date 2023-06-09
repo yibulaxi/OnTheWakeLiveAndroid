@@ -10,7 +10,7 @@ object Constants {
     const val PREFS_JWT_TOKEN = "jwt_token"
     const val PREFS_USER_ID = "user_id"
 
-    const val ONESIGNAL_APP_ID = "8890bfbd-a1d0-426a-98ae-88aa5b954b68"
+    const val ONESIGNAL_APP_ID = "5c9cfbcc-ab83-4f25-83b9-7291eb7834c4"
 
     const val REGISTER_DATA_ARGUMENT_KEY = "register_data_arg_key"
     const val PICTURE_URL_ARGUMENT_KEY = "picture_url_arg_key"

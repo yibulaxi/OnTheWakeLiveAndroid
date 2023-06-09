@@ -121,4 +121,12 @@ class QueueViewModel @Inject constructor(
     fun toggleAdminDialog() {
         _state.value = state.value.copy(showAdminDialog = !state.value.showAdminDialog)
     }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        viewModelScope.launch {
+            queueSocketService.closeSession()
+        }
+    }
 }

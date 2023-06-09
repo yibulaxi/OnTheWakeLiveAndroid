@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.onthewake.onthewakelive.core.presentation.components.StandardScaffold
 import com.onthewake.onthewakelive.core.presentation.ui.theme.OnTheWakeLiveTheme
@@ -16,7 +15,6 @@ import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketSe
 import com.onthewake.onthewakelive.feature_splash.presentation.SplashViewModel
 import com.onthewake.onthewakelive.navigation.SetupNavGraph
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -55,14 +53,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        lifecycleScope.launch {
-            queueSocketService.closeSession()
         }
     }
 }

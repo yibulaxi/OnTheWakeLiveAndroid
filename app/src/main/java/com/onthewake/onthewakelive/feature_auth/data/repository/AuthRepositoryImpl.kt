@@ -6,7 +6,11 @@ import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
-import com.google.firebase.auth.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.onesignal.OneSignal
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_JWT_TOKEN
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
@@ -136,7 +140,6 @@ class AuthRepositoryImpl(
                 PhoneAuthProvider.verifyPhoneNumber(options)
             }
         } catch (exception: Exception) {
-            exception.printStackTrace()
             continuation.resume(AuthResult.UnknownError)
         }
     }
