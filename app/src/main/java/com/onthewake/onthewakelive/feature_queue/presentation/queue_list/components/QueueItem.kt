@@ -16,6 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,16 +44,17 @@ fun QueueItem(
     val isOwnQueueItem = queueItem.userId == userId
     val isUserAdmin = userId in Constants.ADMIN_IDS
 
+
+    val currentItem by rememberUpdatedState(queueItem)
     val dismissState = rememberDismissState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == DismissValue.DismissedToEnd) {
-                onSwipeToDelete(queueItem.id)
+                onSwipeToDelete(currentItem.id)
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
             false
         }
     )
-
 
     if (isOwnQueueItem || isUserAdmin) {
         SwipeToDismiss(

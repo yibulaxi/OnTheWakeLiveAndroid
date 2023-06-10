@@ -44,8 +44,6 @@ class AuthRepositoryImpl(
         sharedPreferences.put(PREFS_JWT_TOKEN, response.token)
         sharedPreferences.put(PREFS_USER_ID, response.userId)
 
-        OneSignal.setExternalUserId(response.userId)
-
         AuthResult.Authorized
     } catch (exception: HttpException) {
         when (exception.code()) {
@@ -58,7 +56,9 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signUp(accountRequest: CreateAccountRequest): AuthResult = try {
-        api.signUp(request = accountRequest)
+        val result = api.signUp(request = accountRequest)
+
+        OneSignal.setExternalUserId(result.userId)
 
         dataStore.updateData { profile ->
             profile.copy(
@@ -80,6 +80,7 @@ class AuthRepositoryImpl(
             else -> AuthResult.UnknownError
         }
     } catch (exception: Exception) {
+        println("signUp exception $exception")
         AuthResult.UnknownError
     }
 
