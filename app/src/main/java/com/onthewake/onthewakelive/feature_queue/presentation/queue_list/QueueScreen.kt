@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +45,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedShimmer
@@ -119,6 +123,17 @@ fun QueueScreen(
         onAddClicked = viewModel::joinTheQueue
     )
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(key1 = lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) viewModel.connectToQueue()
+            else if (event == Lifecycle.Event.ON_PAUSE) viewModel.closeSession()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
@@ -135,7 +150,9 @@ fun QueueScreen(
         },
         floatingActionButton = {
             if (!state.isQueueLoading) FloatingActionButton(
-                modifier = Modifier.padding(bottom = 80.dp),
+                modifier = Modifier.padding(
+                    bottom = if (state.userId.isUserAdmin()) 0.dp else 80.dp
+                ),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
 

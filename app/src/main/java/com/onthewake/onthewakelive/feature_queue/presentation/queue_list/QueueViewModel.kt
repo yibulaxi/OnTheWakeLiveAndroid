@@ -28,14 +28,11 @@ class QueueViewModel @Inject constructor(
     val state: State<QueueState> = _state
 
     init {
-        if (!queueSocketService.isConnectionEstablished()) connectToQueue()
-        else observeQueue()
-
         getQueue()
         getUserId()
     }
 
-    private fun connectToQueue() {
+    fun connectToQueue() {
         viewModelScope.launch {
             when (val result = queueSocketService.initSession()) {
                 is Resource.Success -> observeQueue()
@@ -122,11 +119,14 @@ class QueueViewModel @Inject constructor(
         _state.value = state.value.copy(showAdminDialog = !state.value.showAdminDialog)
     }
 
-    override fun onCleared() {
-        super.onCleared()
-
+    fun closeSession() {
         viewModelScope.launch {
             queueSocketService.closeSession()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        closeSession()
     }
 }
