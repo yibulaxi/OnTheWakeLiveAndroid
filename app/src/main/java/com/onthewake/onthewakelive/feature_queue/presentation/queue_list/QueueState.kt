@@ -1,6 +1,5 @@
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_list
 
-import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 
 data class QueueState(
@@ -9,6 +8,5 @@ data class QueueState(
     val isQueueLoading: Boolean = false,
     val showLeaveQueueDialog: Boolean = false,
     val queueItemIdToDelete: String? = null,
-    val showAdminDialog: Boolean = false,
-    val error: UIText? = null
+    val showAdminDialog: Boolean = false
 )

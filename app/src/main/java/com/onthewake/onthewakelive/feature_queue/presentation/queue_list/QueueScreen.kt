@@ -51,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
@@ -67,17 +66,19 @@ import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.compone
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.QueueItem
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.TabLayout
 import com.onthewake.onthewakelive.navigation.Screen
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun QueueScreen(
-    viewModel: QueueViewModel = hiltViewModel(),
+    viewModel: QueueViewModel,
     navController: NavHostController
 ) {
     val state = viewModel.state.value
 
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val haptic = LocalHapticFeedback.current
 
     val pagerState = rememberPagerState(
@@ -105,9 +106,9 @@ fun QueueScreen(
         onResult = { isGranted -> hasNotificationPermission = isGranted }
     )
 
-    LaunchedEffect(key1 = state.error) {
-        state.error?.let { error ->
-            snackBarHostState.showSnackbar(message = error.asString(context))
+    LaunchedEffect(key1 = true) {
+        viewModel.snackBarEvent.collectLatest { message ->
+            snackBarHostState.showSnackbar(message = message.asString(context))
         }
     }
 
@@ -123,12 +124,9 @@ fun QueueScreen(
         onAddClicked = viewModel::joinTheQueue
     )
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-
     DisposableEffect(key1 = lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) viewModel.connectToQueue()
-            else if (event == Lifecycle.Event.ON_PAUSE) viewModel.closeSession()
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }

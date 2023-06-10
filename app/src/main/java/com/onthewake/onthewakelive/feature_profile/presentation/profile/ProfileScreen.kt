@@ -30,6 +30,7 @@ import com.onthewake.onthewakelive.core.presentation.components.StandardImageVie
 import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
 import com.onthewake.onthewakelive.core.utils.addPlusPrefix
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
+import com.onthewake.onthewakelive.navigation.NavigationRoute
 import com.onthewake.onthewakelive.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,9 +67,12 @@ fun ProfileScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            viewModel.logout()
+
                             navController.navigate(Screen.LoginScreen.route) {
-                                popUpTo(Screen.QueueScreen.route) { inclusive = true }
-                                viewModel.logout()
+                                popUpTo(NavigationRoute.MainNavigation.route) {
+                                    inclusive = true
+                                }
                             }
                         }
                     ) {

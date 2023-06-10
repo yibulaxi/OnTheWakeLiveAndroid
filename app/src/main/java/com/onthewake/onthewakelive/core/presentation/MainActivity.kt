@@ -43,14 +43,14 @@ class MainActivity : ComponentActivity() {
                 val userId = preferences.getString(Constants.PREFS_USER_ID, null)
                 val state = splashViewModel.state.value
 
-                state.startDestination?.let { startDestination ->
+                state.startDestinationRoute?.let { startDestinationRoute ->
                     StandardScaffold(
                         navController = navController,
                         isUserAdmin = userId.isUserAdmin()
                     ) {
                         SetupNavGraph(
                             navController = navController,
-                            startDestination = startDestination
+                            startDestinationRoute = startDestinationRoute
                         )
                     }
                 }

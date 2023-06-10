@@ -32,3 +32,8 @@ sealed class Screen(val route: String) {
         }
     }
 }
+
+sealed class NavigationRoute(val route: String) {
+    object AuthNavigation : NavigationRoute("auth_navigation")
+    object MainNavigation : NavigationRoute("main_navigation")
+}

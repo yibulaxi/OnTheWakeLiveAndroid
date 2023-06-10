@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.core.utils.Constants.PREFS_USER_ID
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.feature_queue.domain.module.Action
@@ -12,6 +13,8 @@ import com.onthewake.onthewakelive.feature_queue.domain.module.Line
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueService
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -27,16 +30,22 @@ class QueueViewModel @Inject constructor(
     private val _state = mutableStateOf(QueueState())
     val state: State<QueueState> = _state
 
+    private val _snackBarEvent = MutableSharedFlow<UIText>()
+    val snackBarEvent = _snackBarEvent.asSharedFlow()
+
     init {
-        getQueue()
-        getUserId()
+        connectToQueue()
     }
 
     fun connectToQueue() {
+        if (queueSocketService.isConnectionEstablished()) return
+        getQueue()
+        getUserId()
+
         viewModelScope.launch {
             when (val result = queueSocketService.initSession()) {
                 is Resource.Success -> observeQueue()
-                is Resource.Error -> _state.value = state.value.copy(error = result.message)
+                is Resource.Error -> _snackBarEvent.emit(result.message)
             }
         }
     }
@@ -65,9 +74,7 @@ class QueueViewModel @Inject constructor(
                     queue = result.data ?: emptyList()
                 )
 
-                is Resource.Error -> _state.value = state.value.copy(
-                    error = result.message
-                )
+                is Resource.Error -> _snackBarEvent.emit(result.message)
             }
             _state.value = state.value.copy(isQueueLoading = false)
         }
@@ -76,18 +83,18 @@ class QueueViewModel @Inject constructor(
     fun joinTheQueue(line: Line, firstName: String? = null) {
         _state.value = state.value.copy(showLeaveQueueDialog = false)
 
-        val canJoinTheQueue = queueSocketService.canJoinTheQueue(
-            line = line, queue = state.value.queue
-        )
-        when (canJoinTheQueue) {
-            is Resource.Success -> {
-                viewModelScope.launch {
+        viewModelScope.launch {
+            val canJoinTheQueue = queueSocketService.canJoinTheQueue(
+                line = line, queue = state.value.queue
+            )
+            when (canJoinTheQueue) {
+                is Resource.Success -> {
                     queueSocketService.joinTheQueue(line = line, firstName = firstName)
                 }
-            }
 
-            is Resource.Error -> {
-                _state.value = state.value.copy(error = canJoinTheQueue.message)
+                is Resource.Error -> {
+                    _snackBarEvent.emit(canJoinTheQueue.message)
+                }
             }
         }
     }
@@ -119,7 +126,7 @@ class QueueViewModel @Inject constructor(
         _state.value = state.value.copy(showAdminDialog = !state.value.showAdminDialog)
     }
 
-    fun closeSession() {
+    private fun closeSession() {
         viewModelScope.launch {
             queueSocketService.closeSession()
         }
