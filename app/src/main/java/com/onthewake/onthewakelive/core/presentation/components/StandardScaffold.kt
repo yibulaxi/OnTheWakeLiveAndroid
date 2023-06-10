@@ -1,25 +1,25 @@
 package com.onthewake.onthewakelive.core.presentation.components
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import com.onthewake.onthewakelive.R
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.domain.modules.BottomNavItem
 import com.onthewake.onthewakelive.navigation.Screen
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun StandardScaffold(
     navController: NavHostController,
@@ -46,11 +46,11 @@ fun StandardScaffold(
         )
     )
 
-    val shouldShowBottomBar = navBackStackEntry?.destination?.route in listOf(
-        Screen.QueueScreen.route, Screen.ProfileScreen.route
-    ) && !isUserAdmin
+    val shouldShowBottomBar = navBackStackEntry?.destination?.route in
+            bottomNavItems.map { it.route } && !isUserAdmin
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (shouldShowBottomBar && isPortraitOrientation) NavigationBar {
                 bottomNavItems.forEach { item ->
@@ -77,9 +77,7 @@ fun StandardScaffold(
                 }
             }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            content()
-        }
+    ) {
+        content()
     }
 }

@@ -53,7 +53,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedShimmer
-import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.isUserAdmin
 import com.onthewake.onthewakelive.core.utils.openNotificationSettings
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
@@ -86,7 +85,6 @@ fun QueueScreen(
     val scope = rememberCoroutineScope()
 
     val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-    SetSystemBarsColor(systemBarsColor = surfaceColor)
 
     var hasNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -137,6 +135,7 @@ fun QueueScreen(
         },
         floatingActionButton = {
             if (!state.isQueueLoading) FloatingActionButton(
+                modifier = Modifier.padding(bottom = 80.dp),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
 

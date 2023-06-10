@@ -28,7 +28,6 @@ import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
-import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.addPlusPrefix
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.navigation.Screen
@@ -45,9 +44,7 @@ fun ProfileScreen(
     val haptic = LocalHapticFeedback.current
 
     val snackBarHostState = remember { SnackbarHostState() }
-
     val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-    SetSystemBarsColor(systemBarsColor = surfaceColor)
 
     LaunchedEffect(key1 = state.error) {
         state.error?.let { error ->

@@ -24,12 +24,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.onthewake.onthewakelive.R
-import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 
 @Composable
 fun ServerUnavailableScreen() {
-    SetSystemBarsColor(systemBarsColor = MaterialTheme.colorScheme.background)
-
     val compositionResult: LottieCompositionResult = rememberLottieComposition(
         spec = LottieCompositionSpec.RawRes(R.raw.server_error)
     )

@@ -2,14 +2,17 @@ package com.onthewake.onthewakelive.feature_auth.presentation.auth_register
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -50,6 +53,7 @@ import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.Regis
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RegisterScreen(
     navController: NavHostController,
@@ -69,15 +73,19 @@ fun RegisterScreen(
                 AuthResult.OtpTooManyRequests -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.otp_too_many_requests)
                 )
+
                 AuthResult.OtpInvalidCredentials -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.invalid_phone_number)
                 )
+
                 AuthResult.UserAlreadyExist -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.user_already_exists)
                 )
+
                 AuthResult.UnknownError -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.unknown_error)
                 )
+
                 else -> Unit
             }
         }
@@ -96,97 +104,14 @@ fun RegisterScreen(
     }
 
     AnimatedScaffold(
+        modifier = Modifier.systemBarsPadding(),
         isLoading = state.isLoading,
-        snackBarHost = { SnackbarHost(hostState = snackBarHostState) }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(all = 24.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center)
-                    .verticalScroll(rememberScrollState())
-                    .imePadding(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.sign_up),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.firstName,
-                    onValueChange = { viewModel.onEvent(FirstNameChanged(it)) },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
-                    ),
-                    label = stringResource(id = R.string.first_name),
-                    errorText = state.firstNameError
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.lastName,
-                    onValueChange = { viewModel.onEvent(LastNameChanged(it)) },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
-                    ),
-                    label = stringResource(id = R.string.last_name),
-                    errorText = state.lastNameError
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.phoneNumber,
-                    onValueChange = { viewModel.onEvent(PhoneNumberChanged(it)) },
-                    label = stringResource(id = R.string.phone_number),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Phone,
-                        imeAction = ImeAction.Next
-                    ),
-                    errorText = state.phoneNumberError,
-                    isPhoneNumberTextField = true
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                StandardTextField(
-                    value = state.password,
-                    onValueChange = { viewModel.onEvent(PasswordChanged(it)) },
-                    label = stringResource(id = R.string.password),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            viewModel.onEvent(SendOtp(context = context))
-                            focusManager.clearFocus()
-                        }
-                    ),
-                    isPasswordTextField = true,
-                    errorText = state.passwordError
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        viewModel.onEvent(SendOtp(context = context))
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        focusManager.clearFocus()
-                    },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(text = stringResource(id = R.string.create_account))
-                }
-                Spacer(modifier = Modifier.height(30.dp))
-            }
+        snackBarHost = { SnackbarHost(hostState = snackBarHostState) },
+        bottomBar = {
             Row(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(vertical = 12.dp)
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
                     .clickable { navController.navigate(Screen.LoginScreen.route) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -200,6 +125,86 @@ fun RegisterScreen(
                     text = stringResource(id = R.string.sign_in) + "!",
                     color = MaterialTheme.colorScheme.primary
                 )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(all = 24.dp)
+                .consumeWindowInsets(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(id = R.string.sign_up),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.firstName,
+                onValueChange = { viewModel.onEvent(FirstNameChanged(it)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                label = stringResource(id = R.string.first_name),
+                errorText = state.firstNameError
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.lastName,
+                onValueChange = { viewModel.onEvent(LastNameChanged(it)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                label = stringResource(id = R.string.last_name),
+                errorText = state.lastNameError
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.phoneNumber,
+                onValueChange = { viewModel.onEvent(PhoneNumberChanged(it)) },
+                label = stringResource(id = R.string.phone_number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next
+                ),
+                errorText = state.phoneNumberError,
+                isPhoneNumberTextField = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            StandardTextField(
+                value = state.password,
+                onValueChange = { viewModel.onEvent(PasswordChanged(it)) },
+                label = stringResource(id = R.string.password),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        viewModel.onEvent(SendOtp(context = context))
+                        focusManager.clearFocus()
+                    }
+                ),
+                isPasswordTextField = true,
+                errorText = state.passwordError
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    viewModel.onEvent(SendOtp(context = context))
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    focusManager.clearFocus()
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(text = stringResource(id = R.string.create_account))
             }
         }
     }

@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.onthewake.onthewakelive.core.presentation.components.StandardScaffold
 import com.onthewake.onthewakelive.core.presentation.ui.theme.OnTheWakeLiveTheme
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         installSplashScreen().setKeepOnScreenCondition {
             splashViewModel.state.value.isLoading
