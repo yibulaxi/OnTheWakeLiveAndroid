@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,11 +42,12 @@ fun QueueItem(
     val isOwnQueueItem = queueItem.userId == userId
     val isUserAdmin = userId in Constants.ADMIN_IDS
 
-    val currentItem by rememberUpdatedState(queueItem)
     val dismissState = rememberDismissState(
-        confirmValueChange = {
-            onSwipeToDelete(currentItem.id)
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        confirmValueChange = { dismissValue ->
+            if (dismissValue == DismissValue.DismissedToEnd) {
+                onSwipeToDelete(queueItem.id)
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
             false
         }
     )
