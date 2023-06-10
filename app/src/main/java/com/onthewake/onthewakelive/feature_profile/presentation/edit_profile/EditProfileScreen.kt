@@ -81,7 +81,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    showSnackBar: (String) -> Unit
 ) {
     val state = viewModel.state.value
     val profilePictureUri = viewModel.selectedProfilePictureUri.value
@@ -97,7 +98,7 @@ fun EditProfileScreen(
 
     LaunchedEffect(key1 = true) {
         viewModel.snackBarEvent.collectLatest { message ->
-            snackBarHostState.showSnackbar(message = message.asString(context))
+            showSnackBar(message.asString(context))
         }
     }
 

@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
@@ -16,6 +19,7 @@ import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueSocketSe
 import com.onthewake.onthewakelive.feature_splash.presentation.SplashViewModel
 import com.onthewake.onthewakelive.navigation.SetupNavGraph
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -43,14 +47,19 @@ class MainActivity : ComponentActivity() {
                 val userId = preferences.getString(Constants.PREFS_USER_ID, null)
                 val state = splashViewModel.state.value
 
+                val snackBarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
+
                 state.startDestinationRoute?.let { startDestinationRoute ->
                     StandardScaffold(
                         navController = navController,
-                        isUserAdmin = userId.isUserAdmin()
+                        isUserAdmin = userId.isUserAdmin(),
+                        snackbarHostState = snackBarHostState
                     ) {
                         SetupNavGraph(
                             navController = navController,
-                            startDestinationRoute = startDestinationRoute
+                            startDestinationRoute = startDestinationRoute,
+                            showSnackBar = { scope.launch { snackBarHostState.showSnackbar(it) } }
                         )
                     }
                 }

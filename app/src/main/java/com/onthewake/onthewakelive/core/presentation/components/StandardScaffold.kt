@@ -24,6 +24,7 @@ import com.onthewake.onthewakelive.navigation.Screen
 fun StandardScaffold(
     navController: NavHostController,
     isUserAdmin: Boolean,
+    snackbarHostState: SnackbarHostState,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -50,6 +51,7 @@ fun StandardScaffold(
             bottomNavItems.map { it.route } && !isUserAdmin
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (shouldShowBottomBar && isPortraitOrientation) NavigationBar {

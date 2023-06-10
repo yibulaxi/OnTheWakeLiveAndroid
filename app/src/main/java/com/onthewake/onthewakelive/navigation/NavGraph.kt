@@ -26,7 +26,8 @@ import com.onthewake.onthewakelive.feature_splash.presentation.components.Server
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    startDestinationRoute: String
+    startDestinationRoute: String,
+    showSnackBar: (String) -> Unit
 ) {
     val queueViewModel: QueueViewModel = hiltViewModel()
 
@@ -36,7 +37,11 @@ fun SetupNavGraph(
     ) {
         composable(route = Screen.ServerUnavailableScreen.route) { ServerUnavailableScreen() }
         authNavigation(navController = navController)
-        mainNavigation(navController = navController, queueViewModel = queueViewModel)
+        mainNavigation(
+            navController = navController,
+            queueViewModel = queueViewModel,
+            showSnackBar = showSnackBar
+        )
     }
 }
 
@@ -66,7 +71,8 @@ fun NavGraphBuilder.authNavigation(
 
 fun NavGraphBuilder.mainNavigation(
     navController: NavHostController,
-    queueViewModel: QueueViewModel
+    queueViewModel: QueueViewModel,
+    showSnackBar: (String) -> Unit
 ) {
     navigation(
         startDestination = Screen.QueueScreen.route,
@@ -85,7 +91,7 @@ fun NavGraphBuilder.mainNavigation(
             ProfileScreen(navController = navController)
         }
         composable(route = Screen.EditProfileScreen.route) {
-            EditProfileScreen(navController = navController)
+            EditProfileScreen(navController = navController, showSnackBar = showSnackBar)
         }
         composable(
             route = Screen.FullSizeAvatarScreen.route,
