@@ -2,7 +2,7 @@ package com.onthewake.onthewakelive.core.utils
 
 object Constants {
     const val BASE_URL = "https://onthewakelive.herokuapp.com"
-    const val WS_BASE_URL = "ws://onthewakelive.herokuapp.com/queue-socket"
+    const val WS_BASE_URL = "wss://onthewakelive.herokuapp.com/queue-socket"
 
     val ADMIN_IDS = listOf("62f7af2f33e0d47030d73849", "62fe27a88f997574d627b848")
 

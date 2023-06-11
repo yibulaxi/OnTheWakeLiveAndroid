@@ -45,6 +45,7 @@ import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.PasswordChanged
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.PhoneNumberChange
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginEvent.SignIn
+import com.onthewake.onthewakelive.navigation.NavigationRoute
 import com.onthewake.onthewakelive.navigation.Screen
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -64,8 +65,10 @@ fun LoginScreen(
     LaunchedEffect(true) {
         viewModel.authResult.collect { result ->
             when (result) {
-                AuthResult.Authorized -> navController.navigate(Screen.QueueScreen.route) {
-                    popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                AuthResult.Authorized -> {
+                    navController.navigate(NavigationRoute.MainNavigation.route) {
+                        popUpTo(NavigationRoute.AuthNavigation.route) { inclusive = true }
+                    }
                 }
 
                 AuthResult.IncorrectData -> snackBarHostState.showSnackbar(
