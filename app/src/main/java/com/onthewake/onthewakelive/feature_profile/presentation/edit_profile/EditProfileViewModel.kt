@@ -138,9 +138,12 @@ class EditProfileViewModel @Inject constructor(
             _state.value = state.value.copy(isLoading = false)
 
             when (result) {
-                is Resource.Success -> _snackBarEvent.emit(
-                    UIText.StringResource(R.string.successfully_updated_profile)
-                )
+                is Resource.Success -> {
+                    _snackBarEvent.emit(
+                        UIText.StringResource(R.string.successfully_updated_profile)
+                    )
+                    _navigateUp.emit(true)
+                }
 
                 is Resource.Error -> _snackBarEvent.emit(result.message)
             }

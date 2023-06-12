@@ -3,7 +3,6 @@ package com.onthewake.onthewakelive.feature_full_size_avatar.presentation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +18,6 @@ import coil.compose.AsyncImage
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardLoadingView
 import com.onthewake.onthewakelive.core.presentation.components.StandardTopBar
-import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 
 @Composable
 fun FullSizeAvatarScreen(
@@ -27,8 +25,6 @@ fun FullSizeAvatarScreen(
     profilePictureUrl: String?
 ) {
     var isImageLoading by remember { mutableStateOf(false) }
-
-    SetSystemBarsColor(systemBarsColor = MaterialTheme.colorScheme.background)
 
     var isVisible by remember { mutableStateOf(false) }
     LaunchedEffect(key1 = true) { isVisible = true }

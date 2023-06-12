@@ -35,18 +35,20 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(sharedPreferences: SharedPreferences): OkHttpClient =
-        OkHttpClient.Builder().addInterceptor {
-            val token = sharedPreferences.getString(PREFS_JWT_TOKEN, null)
-            val modifiedRequest = it.request().newBuilder()
-                .addHeader("Authorization", "Bearer $token")
-                .build()
-            it.proceed(modifiedRequest)
-        }.addInterceptor(
-            HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
-        ).build()
+    fun provideOkHttpClient(
+        sharedPreferences: SharedPreferences
+    ): OkHttpClient = OkHttpClient.Builder().addInterceptor {
+        val token = sharedPreferences.getString(PREFS_JWT_TOKEN, null)
+        val modifiedRequest = it.request()
+            .newBuilder()
+            .addHeader("Authorization", "Bearer $token")
+            .build()
+        it.proceed(modifiedRequest)
+    }.addInterceptor(
+        HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+    ).build()
 
     @Provides
     @Singleton

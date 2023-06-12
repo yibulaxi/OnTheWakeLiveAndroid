@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onthewake.onthewakelive.feature_auth.domain.models.AuthResult
 import com.onthewake.onthewakelive.feature_auth.domain.repository.AuthRepository
+import com.onthewake.onthewakelive.navigation.NavigationRoute
 import com.onthewake.onthewakelive.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -28,13 +29,13 @@ class SplashViewModel @Inject constructor(
             _state.value = state.value.copy(isLoading = true)
 
             val startDestination = when (repository.authenticate()) {
-                AuthResult.Authorized -> Screen.QueueScreen
-                AuthResult.Unauthorized -> Screen.LoginScreen
-                else -> Screen.ServerUnavailableScreen
+                AuthResult.Authorized -> NavigationRoute.MainNavigation.route
+                AuthResult.Unauthorized -> NavigationRoute.AuthNavigation.route
+                else -> Screen.ServerUnavailableScreen.route
             }
 
             _state.value = state.value.copy(
-                startDestination = startDestination,
+                startDestinationRoute = startDestination,
                 isLoading = false
             )
         }

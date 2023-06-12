@@ -3,16 +3,17 @@ package com.onthewake.onthewakelive.feature_auth.data.remote
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.AuthRequest
 import com.onthewake.onthewakelive.feature_auth.data.remote.request.CreateAccountRequest
 import com.onthewake.onthewakelive.feature_auth.data.remote.response.AuthResponse
+import com.onthewake.onthewakelive.feature_auth.data.remote.response.SignUpResponse
 import retrofit2.http.*
 
 interface AuthApi {
 
-    @POST("/sign_up")
+    @POST("/signup")
     suspend fun signUp(
         @Body request: CreateAccountRequest
-    )
+    ): SignUpResponse
 
-    @POST("/sign_in")
+    @POST("/signin")
     suspend fun signIn(
         @Body request: AuthRequest
     ): AuthResponse

@@ -5,8 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.onthewake.onthewakelive.core.presentation.components.StandardScaffold
 import com.onthewake.onthewakelive.core.presentation.ui.theme.OnTheWakeLiveTheme
@@ -32,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         installSplashScreen().setKeepOnScreenCondition {
             splashViewModel.state.value.isLoading
@@ -43,26 +47,23 @@ class MainActivity : ComponentActivity() {
                 val userId = preferences.getString(Constants.PREFS_USER_ID, null)
                 val state = splashViewModel.state.value
 
-                state.startDestination?.let { startDestination ->
+                val snackBarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
+
+                state.startDestinationRoute?.let { startDestinationRoute ->
                     StandardScaffold(
                         navController = navController,
-                        isUserAdmin = userId.isUserAdmin()
+                        isUserAdmin = userId.isUserAdmin(),
+                        snackbarHostState = snackBarHostState
                     ) {
                         SetupNavGraph(
                             navController = navController,
-                            startDestination = startDestination
+                            startDestinationRoute = startDestinationRoute,
+                            showSnackBar = { scope.launch { snackBarHostState.showSnackbar(it) } }
                         )
                     }
                 }
             }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        lifecycleScope.launch {
-            queueSocketService.closeSession()
         }
     }
 }

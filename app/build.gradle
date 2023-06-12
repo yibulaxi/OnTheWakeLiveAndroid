@@ -7,7 +7,20 @@ plugins {
     id 'kotlin-kapt'
 }
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
     namespace 'com.onthewake.onthewakelive'
     compileSdk 33
 
@@ -26,9 +39,11 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable true
         }
     }
     compileOptions {
@@ -42,7 +57,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.4'
+        kotlinCompilerExtensionVersion '1.4.7'
     }
     packagingOptions {
         resources {
@@ -52,28 +67,28 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
-    implementation 'androidx.activity:activity-compose:1.7.0'
+    implementation 'androidx.activity:activity-compose:1.7.2'
 
     // Jetpack compose
-    implementation platform('androidx.compose:compose-bom:2023.03.00')
+    implementation platform('androidx.compose:compose-bom:2023.04.01')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material:material-icons-extended'
 
     // Jetpack compose Navigation
-    implementation 'androidx.navigation:navigation-compose:2.5.3'
+    implementation 'androidx.navigation:navigation-compose:2.6.0'
 
     // Material 3
-    implementation 'androidx.compose.material3:material3:1.1.0-beta02'
+    implementation 'androidx.compose.material3:material3:1.2.0-alpha02'
 
     // Material 3 - CALENDAR
     implementation "com.maxkeppeler.sheets-compose-dialogs:core:1.1.1"
     implementation "com.maxkeppeler.sheets-compose-dialogs:calendar:1.1.1"
 
     // Accompanist System UI Controller
-    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha'
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.31.1-alpha'
 
     // Dagger - Hilt
     implementation 'com.google.dagger:hilt-android:2.45'
@@ -85,7 +100,7 @@ dependencies {
     implementation "androidx.datastore:datastore:1.0.0"
 
     // Ktor
-    def ktor_version = '2.2.4'
+    def ktor_version = '2.3.0'
     implementation "io.ktor:ktor-client-core:$ktor_version"
     implementation "io.ktor:ktor-client-cio:$ktor_version"
     implementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
@@ -100,7 +115,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.3'
 
     // Firebase
-    implementation platform('com.google.firebase:firebase-bom:31.2.3')
+    implementation platform('com.google.firebase:firebase-bom:32.1.0')
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
 
@@ -108,17 +123,14 @@ dependencies {
     implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'
 
     // Lottie
-    implementation 'com.airbnb.android:lottie-compose:5.2.0'
+    implementation 'com.airbnb.android:lottie-compose:6.0.0'
 
     // uCrop
     implementation 'com.github.yalantis:ucrop:2.2.8'
 
-    // Swipe to Delete
-    implementation 'me.saket.swipe:swipe:1.0.0'
-
     // Splash Screen API for android versions below 12
-    implementation 'androidx.core:core-splashscreen:1.0.0'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
 
     // Coil
-    implementation 'io.coil-kt:coil-compose:2.2.2'
+    implementation 'io.coil-kt:coil-compose:2.3.0'
 }

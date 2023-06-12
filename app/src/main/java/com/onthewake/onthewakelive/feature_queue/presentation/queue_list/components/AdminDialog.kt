@@ -1,11 +1,31 @@
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,7 +44,7 @@ import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 @ExperimentalMaterial3Api
 @Composable
 fun AdminDialog(
-    showDialog: (Boolean) -> Unit,
+    onDismissRequest: () -> Unit,
     onAddClicked: (Line, String) -> Unit,
     queue: List<QueueItem>
 ) {
@@ -32,17 +52,22 @@ fun AdminDialog(
     var firstNameFieldState by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
 
-    val rightButtonColor = if (line == Line.RIGHT) MaterialTheme.colorScheme.primaryContainer
-    else MaterialTheme.colorScheme.onPrimaryContainer
-    val leftButtonColor = if (line == Line.LEFT) MaterialTheme.colorScheme.primaryContainer
-    else MaterialTheme.colorScheme.onPrimaryContainer
+    val rightButtonColor = if (line == Line.RIGHT) MaterialTheme.colorScheme.onPrimaryContainer
+    else MaterialTheme.colorScheme.primaryContainer
+    val leftButtonColor = if (line == Line.LEFT) MaterialTheme.colorScheme.onPrimaryContainer
+    else MaterialTheme.colorScheme.primaryContainer
 
-    Dialog(onDismissRequest = { showDialog(false) }) {
+    Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             shape = AlertDialogDefaults.shape,
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
         ) {
-            Column(modifier = Modifier.padding(14.dp)) {
+            Column(
+                modifier = Modifier
+                    .height(330.dp)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(id = R.string.add_to_queue),
@@ -52,11 +77,9 @@ fun AdminDialog(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
+                        modifier = Modifier.weight(1f),
                         onClick = { line = Line.LEFT },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = leftButtonColor,
@@ -71,10 +94,11 @@ fun AdminDialog(
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         }
-                        Text(text = stringResource(id = R.string.left_line))
+                        Text(text = stringResource(id = R.string.left))
                     }
                     Spacer(modifier = Modifier.width(20.dp))
                     Button(
+                        modifier = Modifier.weight(1f),
                         onClick = { line = Line.RIGHT },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = rightButtonColor,
@@ -89,7 +113,7 @@ fun AdminDialog(
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         }
-                        Text(text = stringResource(id = R.string.right_line))
+                        Text(text = stringResource(id = R.string.right))
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
@@ -110,7 +134,7 @@ fun AdminDialog(
                         )
                         if (addToQueueResult.successful) {
                             onAddClicked(line, firstNameFieldState)
-                            showDialog(false)
+                            onDismissRequest()
                         } else {
                             errorMessage = addToQueueResult.errorMessage
                         }

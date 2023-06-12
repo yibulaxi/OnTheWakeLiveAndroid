@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalAnimationApi::class)
-
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_list
 
 import android.Manifest
@@ -8,7 +6,6 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,52 +15,81 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedShimmer
-import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.isUserAdmin
 import com.onthewake.onthewakelive.core.utils.openNotificationSettings
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
 import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
-import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.*
+import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.AdminDialog
+import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.EmptyContent
+import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.LeaveQueueConfirmationDialog
+import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.QueueItem
+import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.TabLayout
 import com.onthewake.onthewakelive.navigation.Screen
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun QueueScreen(
-    viewModel: QueueViewModel = hiltViewModel(),
+    viewModel: QueueViewModel,
     navController: NavHostController
 ) {
     val state = viewModel.state.value
-    var showLeaveQueueDialog = viewModel.showLeaveQueueDialog
 
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val haptic = LocalHapticFeedback.current
 
-    val pagerState = rememberPagerState(initialPage = 1)
+    val pagerState = rememberPagerState(
+        initialPage = 1,
+        initialPageOffsetFraction = 0f,
+        pageCount = { 2 }
+    )
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-    SetSystemBarsColor(systemBarsColor = surfaceColor)
 
     var hasNotificationPermission by remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -80,27 +106,34 @@ fun QueueScreen(
         onResult = { isGranted -> hasNotificationPermission = isGranted }
     )
 
-    LaunchedEffect(key1 = state.error) {
-        state.error?.let { error ->
-            snackBarHostState.showSnackbar(message = error.asString(context))
+    LaunchedEffect(key1 = true) {
+        viewModel.snackBarEvent.collectLatest { message ->
+            snackBarHostState.showSnackbar(message = message.asString(context))
         }
     }
 
-    if (viewModel.showLeaveQueueDialog.first) LeaveQueueConfirmationDialog(
-        showDialog = { showLeaveQueueDialog = showLeaveQueueDialog.copy(first = it) },
+    if (state.showLeaveQueueDialog) LeaveQueueConfirmationDialog(
+        onDismissRequest = viewModel::hideLeaveQueueDialog,
         isUserAdmin = state.userId.isUserAdmin(),
         onLeaveQueue = viewModel::leaveTheQueue
     )
 
-    if (viewModel.showAdminDialog) AdminDialog(
-        showDialog = { viewModel.showAdminDialog = it },
+    if (state.showAdminDialog) AdminDialog(
+        onDismissRequest = viewModel::toggleAdminDialog,
         queue = state.queue,
-        onAddClicked = { line, firstName ->
-            viewModel.joinTheQueue(line = line, firstName = firstName)
-        }
+        onAddClicked = viewModel::joinTheQueue
     )
 
+    DisposableEffect(key1 = lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) viewModel.connectToQueue()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     Scaffold(
+        modifier = Modifier.padding(bottom = if (state.userId.isUserAdmin()) 0.dp else 80.dp),
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
@@ -124,7 +157,7 @@ fun QueueScreen(
                     }
 
                     if (hasNotificationPermission) {
-                        if (state.userId.isUserAdmin()) viewModel.showAdminDialog = true
+                        if (state.userId.isUserAdmin()) viewModel.toggleAdminDialog()
                         else viewModel.joinTheQueue(
                             line = if (pagerState.currentPage == 0) Line.LEFT else Line.RIGHT
                         )
@@ -157,7 +190,7 @@ fun QueueScreen(
 
             AnimatedContent(targetState = state.isQueueLoading) { isLoading ->
                 if (isLoading) AnimatedShimmer()
-                else HorizontalPager(state = pagerState, pageCount = 2) { page ->
+                else HorizontalPager(state = pagerState, pageSize = PageSize.Fill) { page ->
                     when (page) {
                         0 -> {
                             val leftQueue = remember(state.queue) {
@@ -171,11 +204,7 @@ fun QueueScreen(
                                         Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
                                     )
                                 },
-                                onSwipeToDelete = { queueItemId ->
-                                    showLeaveQueueDialog = showLeaveQueueDialog.copy(
-                                        first = true, second = queueItemId
-                                    )
-                                },
+                                onSwipeToDelete = viewModel::onSwipedToDelete,
                                 onUserAvatarClicked = { pictureUrl ->
                                     navController.navigate(
                                         Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)
@@ -183,6 +212,7 @@ fun QueueScreen(
                                 }
                             )
                         }
+
                         1 -> {
                             val rightQueue = remember(state.queue) {
                                 state.queue.filter { it.line == Line.RIGHT }
@@ -195,11 +225,7 @@ fun QueueScreen(
                                         Screen.QueueDetailsScreen.passItemId(itemId = queueItemId)
                                     )
                                 },
-                                onSwipeToDelete = { queueItemId ->
-                                    showLeaveQueueDialog = showLeaveQueueDialog.copy(
-                                        first = true, second = queueItemId
-                                    )
-                                },
+                                onSwipeToDelete = viewModel::onSwipedToDelete,
                                 onUserAvatarClicked = { pictureUrl ->
                                     navController.navigate(
                                         Screen.FullSizeAvatarScreen.passPictureUrl(pictureUrl)

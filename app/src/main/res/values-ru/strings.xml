@@ -52,6 +52,8 @@
     <string name="arrow_forward">Стрелка вперед</string>
     <string name="user_picture">Фото пользователя</string>
     <string name="edit_profile">Редактировать профиль</string>
+    <string name="left">Левая</string>
+    <string name="right">Правая</string>
     <string name="edit">Редактировать</string>
     <string name="nothing_to_update">Ой! Обновлять нечего.</string>
     <string name="verify_phone_number">Подтвердите номер телефона</string>

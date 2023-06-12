@@ -3,14 +3,41 @@ package com.onthewake.onthewakelive.feature_profile.presentation.edit_profile
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -36,18 +64,25 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
-import com.onthewake.onthewakelive.core.presentation.utils.SetSystemBarsColor
 import com.onthewake.onthewakelive.core.utils.CropActivityResultContract
-import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.*
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.CropImage
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.DateOfBirthChanged
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.EditProfile
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.FirstNameChanged
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.InstagramChanged
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.LastNameChanged
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.PhoneNumberChanged
+import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileUiEvent.TelegramChanged
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    showSnackBar: (String) -> Unit
 ) {
     val state = viewModel.state.value
     val profilePictureUri = viewModel.selectedProfilePictureUri.value
@@ -59,13 +94,11 @@ fun EditProfileScreen(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    val backgroundColor = MaterialTheme.colorScheme.background
-    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-    SetSystemBarsColor(statusBarColor = surfaceColor, navigationBarColor = backgroundColor)
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     LaunchedEffect(key1 = true) {
         viewModel.snackBarEvent.collectLatest { message ->
-            snackBarHostState.showSnackbar(message = message.asString(context))
+            showSnackBar(message.asString(context))
         }
     }
 
@@ -102,16 +135,19 @@ fun EditProfileScreen(
     )
 
     AnimatedScaffold(
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         isLoading = state.isLoading,
         snackBarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = { Text(text = stringResource(id = R.string.edit_profile)) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = surfaceColor
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = navController::popBackStack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = stringResource(id = R.string.arrow_back)
@@ -125,10 +161,12 @@ fun EditProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .background(backgroundColor)
+                .padding(top = paddingValues.calculateTopPadding())
                 .padding(horizontal = 24.dp)
-                .padding(paddingValues),
+                .padding(bottom = 80.dp)
+                .consumeWindowInsets(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Card(
@@ -237,7 +275,6 @@ fun EditProfileScreen(
             ) {
                 Text(text = stringResource(id = R.string.edit))
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

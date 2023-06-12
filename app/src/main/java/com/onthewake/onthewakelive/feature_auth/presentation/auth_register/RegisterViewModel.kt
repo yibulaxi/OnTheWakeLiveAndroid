@@ -105,7 +105,6 @@ class RegisterViewModel @Inject constructor(
                         return@launch
                     }
                 }
-
                 is Resource.Error -> _snackBarEvent.emit(isUserAlreadyExists.message)
             }
 
