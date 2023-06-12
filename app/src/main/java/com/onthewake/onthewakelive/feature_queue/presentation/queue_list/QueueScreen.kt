@@ -133,6 +133,7 @@ fun QueueScreen(
     }
 
     Scaffold(
+        modifier = Modifier.padding(bottom = if (state.userId.isUserAdmin()) 0.dp else 80.dp),
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
@@ -148,9 +149,6 @@ fun QueueScreen(
         },
         floatingActionButton = {
             if (!state.isQueueLoading) FloatingActionButton(
-                modifier = Modifier.padding(
-                    bottom = if (state.userId.isUserAdmin()) 0.dp else 80.dp
-                ),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
 

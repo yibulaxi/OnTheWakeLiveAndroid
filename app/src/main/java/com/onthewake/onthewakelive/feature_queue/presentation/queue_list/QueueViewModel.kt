@@ -116,9 +116,10 @@ class QueueViewModel @Inject constructor(
     }
 
     fun leaveTheQueue() {
-        val queueItemIdToDelete = state.value.queueItemIdToDelete ?: return
         viewModelScope.launch {
-            queueSocketService.leaveTheQueue(queueItemId = queueItemIdToDelete)
+            queueSocketService.leaveTheQueue(
+                queueItemId = state.value.queueItemIdToDelete ?: return@launch
+            )
         }
     }
 
@@ -126,14 +127,11 @@ class QueueViewModel @Inject constructor(
         _state.value = state.value.copy(showAdminDialog = !state.value.showAdminDialog)
     }
 
-    private fun closeSession() {
+    override fun onCleared() {
+        super.onCleared()
+
         viewModelScope.launch {
             queueSocketService.closeSession()
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        closeSession()
     }
 }

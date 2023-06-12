@@ -73,11 +73,9 @@ fun RegisterScreen(
                 AuthResult.OtpTooManyRequests -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.otp_too_many_requests)
                 )
-
                 AuthResult.OtpInvalidCredentials -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.invalid_phone_number)
                 )
-
                 AuthResult.UserAlreadyExist -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.user_already_exists)
                 )
