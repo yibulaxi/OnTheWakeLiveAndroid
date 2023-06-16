@@ -1,5 +1,6 @@
 package com.onthewake.onthewakelive.feature_queue.presentation.add_user_to_the_queue
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,20 +37,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.StandardTextField
-import com.onthewake.onthewakelive.core.presentation.utils.UIText
-import com.onthewake.onthewakelive.feature_auth.domain.use_case.ValidationUseCase
 import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
-import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.QueueViewModel
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.QueueItemContent
 import com.onthewake.onthewakelive.navigation.Screen
 
 @Composable
 fun AddUserToTheQueueScreen(
-    viewModel: QueueViewModel,
+    viewModel: AddUserToTheQueueViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
     val state = viewModel.state.value
@@ -56,7 +56,6 @@ fun AddUserToTheQueueScreen(
     var line by remember { mutableStateOf(Line.RIGHT) }
     var selectedUser by remember { mutableStateOf<Profile?>(null) }
     var firstName by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<UIText?>(null) }
 
     val rightButtonColor = if (line == Line.RIGHT) MaterialTheme.colorScheme.onPrimaryContainer
     else MaterialTheme.colorScheme.primaryContainer
@@ -67,7 +66,7 @@ fun AddUserToTheQueueScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp)
-            .padding(top = 40.dp)
+            .padding(top = 50.dp)
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(
@@ -149,8 +148,7 @@ fun AddUserToTheQueueScreen(
                 label = stringResource(id = R.string.first_name),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences
-                ),
-                errorText = errorMessage
+                )
             )
 
             LazyColumn(
@@ -175,26 +173,26 @@ fun AddUserToTheQueueScreen(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                val addToQueueResult = ValidationUseCase().validateAdminAddToQueue(
+                viewModel.addUserToTheQueue(
+                    user = selectedUser,
                     firstName = firstName,
-                    queue = state.queue
+                    line = line
                 )
-                if (addToQueueResult.successful) {
-                    viewModel.joinTheQueue(
-                        line = line, firstName = firstName
-                    )
-                    navController.popBackStack()
-                } else {
-                    errorMessage = addToQueueResult.errorMessage
-                }
+                navController.popBackStack()
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
-            enabled = selectedUser != null
+            enabled = firstName.isNotEmpty() || selectedUser != null
         ) {
-            Text(text = stringResource(id = R.string.add))
+            AnimatedContent(targetState = state.isUserSearching) { isUserSearching ->
+                if (isUserSearching) CircularProgressIndicator(
+                    modifier = Modifier.size(25.dp),
+                    strokeWidth = 2.dp
+                )
+                else Text(text = stringResource(id = R.string.add))
+            }
         }
         Spacer(modifier = Modifier.height(10.dp))
     }

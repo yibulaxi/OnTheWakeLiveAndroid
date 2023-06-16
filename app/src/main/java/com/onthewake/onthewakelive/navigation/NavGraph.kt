@@ -83,7 +83,7 @@ fun NavGraphBuilder.mainNavigation(
             QueueScreen(viewModel = queueViewModel, navController = navController)
         }
         composable(route = Screen.AddUserToTheQueueScreen.route) {
-            AddUserToTheQueueScreen(viewModel = queueViewModel, navController = navController)
+            AddUserToTheQueueScreen(navController = navController)
         }
         composable(
             route = Screen.QueueDetailsScreen.route,
