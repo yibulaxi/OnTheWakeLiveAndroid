@@ -19,38 +19,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
-import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 
 @Composable
 fun QueueItemContent(
-    queueItem: QueueItem,
-    onDetailsClicked: (String) -> Unit,
+    queueItemId: String? = null,
+    firstName: String,
+    lastName: String,
+    profilePictureUri: String,
+    onItemClicked: (String) -> Unit = {},
     onUserAvatarClicked: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onDetailsClicked(queueItem.id) }
+            .clickable { onItemClicked(queueItemId ?: "") }
             .clip(shape = MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         StandardImageView(
-            model = queueItem.profilePictureUri,
+            model = profilePictureUri,
             onUserAvatarClicked = onUserAvatarClicked
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
             Text(
-                text = queueItem.firstName,
+                text = firstName,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(1.dp))
             Text(
-                text = queueItem.lastName,
+                text = lastName,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

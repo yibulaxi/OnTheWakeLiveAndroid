@@ -44,7 +44,6 @@ fun QueueItem(
     val isOwnQueueItem = queueItem.userId == userId
     val isUserAdmin = userId in Constants.ADMIN_IDS
 
-
     val currentItem by rememberUpdatedState(queueItem)
     val dismissState = rememberDismissState(
         confirmValueChange = { dismissValue ->
@@ -56,6 +55,17 @@ fun QueueItem(
         }
     )
 
+    val queueItemContent: @Composable () -> Unit = {
+        QueueItemContent(
+            queueItemId = queueItem.id,
+            firstName = queueItem.firstName,
+            lastName = queueItem.lastName,
+            profilePictureUri = queueItem.profilePictureUri,
+            onItemClicked = onDetailsClicked,
+            onUserAvatarClicked = onUserAvatarClicked
+        )
+    }
+
     if (isOwnQueueItem || isUserAdmin) {
         SwipeToDismiss(
             modifier = Modifier
@@ -65,15 +75,8 @@ fun QueueItem(
                 .clickable { if (!isAdminQueueItem) onDetailsClicked(queueItem.id) },
             state = dismissState,
             dismissContent = {
-                if (isAdminQueueItem) {
-                    QueueItemAddedByAdmin(firstName = queueItem.firstName)
-                } else {
-                    QueueItemContent(
-                        queueItem = queueItem,
-                        onDetailsClicked = onDetailsClicked,
-                        onUserAvatarClicked = onUserAvatarClicked
-                    )
-                }
+                if (isAdminQueueItem) QueueItemAddedByAdmin(firstName = queueItem.firstName)
+                else queueItemContent()
             },
             background = {
                 Box(
@@ -92,13 +95,6 @@ fun QueueItem(
             },
             directions = setOf(DismissDirection.StartToEnd)
         )
-    } else if (isAdminQueueItem) {
-        QueueItemAddedByAdmin(firstName = queueItem.firstName)
-    } else {
-        QueueItemContent(
-            queueItem = queueItem,
-            onDetailsClicked = onDetailsClicked,
-            onUserAvatarClicked = onUserAvatarClicked
-        )
-    }
+    } else if (isAdminQueueItem) QueueItemAddedByAdmin(firstName = queueItem.firstName)
+    else queueItemContent()
 }

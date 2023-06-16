@@ -18,6 +18,7 @@ import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.Regis
 import com.onthewake.onthewakelive.feature_full_size_avatar.presentation.FullSizeAvatarScreen
 import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileScreen
 import com.onthewake.onthewakelive.feature_profile.presentation.profile.ProfileScreen
+import com.onthewake.onthewakelive.feature_queue.presentation.add_user_to_the_queue.AddUserToTheQueueScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_details.QueueItemDetailsScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.QueueScreen
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.QueueViewModel
@@ -80,6 +81,9 @@ fun NavGraphBuilder.mainNavigation(
     ) {
         composable(route = Screen.QueueScreen.route) {
             QueueScreen(viewModel = queueViewModel, navController = navController)
+        }
+        composable(route = Screen.AddUserToTheQueueScreen.route) {
+            AddUserToTheQueueScreen(viewModel = queueViewModel, navController = navController)
         }
         composable(
             route = Screen.QueueDetailsScreen.route,

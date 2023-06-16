@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
     }
 
     object QueueScreen : Screen("queue_screen")
+    object AddUserToTheQueueScreen : Screen("add_user_to_the_queue_screen")
     object QueueDetailsScreen : Screen(
         "queue_details_screen/{$DETAILS_ARGUMENT_KEY}"
     ) {

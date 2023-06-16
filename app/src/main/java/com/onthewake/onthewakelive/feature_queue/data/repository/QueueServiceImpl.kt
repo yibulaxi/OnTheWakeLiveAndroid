@@ -34,4 +34,8 @@ class QueueServiceImpl(
             }
         }
     }
+
+    override suspend fun searchUsers(searchQuery: String): Result<List<Profile>> = runCatching {
+        queueApi.searchUsers(searchQuery)
+    }
 }

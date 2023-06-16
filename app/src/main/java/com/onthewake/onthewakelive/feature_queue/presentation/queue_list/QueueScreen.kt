@@ -60,7 +60,6 @@ import com.onthewake.onthewakelive.core.utils.isUserAdmin
 import com.onthewake.onthewakelive.core.utils.openNotificationSettings
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
 import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
-import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.AdminDialog
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.EmptyContent
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.LeaveQueueConfirmationDialog
 import com.onthewake.onthewakelive.feature_queue.presentation.queue_list.components.QueueItem
@@ -118,12 +117,6 @@ fun QueueScreen(
         onLeaveQueue = viewModel::leaveTheQueue
     )
 
-    if (state.showAdminDialog) AdminDialog(
-        onDismissRequest = viewModel::toggleAdminDialog,
-        queue = state.queue,
-        onAddClicked = viewModel::joinTheQueue
-    )
-
     DisposableEffect(key1 = lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) viewModel.connectToQueue()
@@ -157,8 +150,9 @@ fun QueueScreen(
                     }
 
                     if (hasNotificationPermission) {
-                        if (state.userId.isUserAdmin()) viewModel.toggleAdminDialog()
-                        else viewModel.joinTheQueue(
+                        if (state.userId.isUserAdmin()) {
+                            navController.navigate(Screen.AddUserToTheQueueScreen.route)
+                        } else viewModel.joinTheQueue(
                             line = if (pagerState.currentPage == 0) Line.LEFT else Line.RIGHT
                         )
                     } else scope.launch {

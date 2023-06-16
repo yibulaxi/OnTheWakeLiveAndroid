@@ -99,6 +99,14 @@ class QueueViewModel @Inject constructor(
         }
     }
 
+    fun searchUser(searchQuery: String) {
+        viewModelScope.launch {
+            queueService.searchUsers(searchQuery = searchQuery).onSuccess { searchedUsers ->
+                _state.value = state.value.copy(searchedUsers = searchedUsers)
+            }
+        }
+    }
+
     private fun getUserId() {
         val userId = sharedPreferences.getString(PREFS_USER_ID, null)
         _state.value = state.value.copy(userId = userId)
@@ -121,10 +129,6 @@ class QueueViewModel @Inject constructor(
                 queueItemId = state.value.queueItemIdToDelete ?: return@launch
             )
         }
-    }
-
-    fun toggleAdminDialog() {
-        _state.value = state.value.copy(showAdminDialog = !state.value.showAdminDialog)
     }
 
     override fun onCleared() {

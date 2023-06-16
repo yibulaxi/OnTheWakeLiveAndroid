@@ -20,9 +20,8 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-
     namespace 'com.onthewake.onthewakelive'
-    compileSdk 33
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.onthewake.onthewakelive"
@@ -43,7 +42,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            debuggable true
+            debuggable false
         }
     }
     compileOptions {
