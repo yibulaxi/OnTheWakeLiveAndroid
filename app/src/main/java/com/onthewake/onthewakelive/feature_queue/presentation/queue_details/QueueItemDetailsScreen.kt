@@ -121,7 +121,8 @@ fun QueueItemDetailsScreen(
                 ) {
                     UserDataItem(
                         title = stringResource(id = R.string.instagram),
-                        subtitle = state.instagram
+                        subtitle = state.instagram,
+                        showDivider = false
                     )
                     if (state.instagram.isNotEmpty()) IconButton(
                         onClick = {
@@ -135,6 +136,7 @@ fun QueueItemDetailsScreen(
                         )
                     }
                 }
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
                 UserDataItem(
                     title = stringResource(id = R.string.telegram),
                     subtitle = state.telegram
