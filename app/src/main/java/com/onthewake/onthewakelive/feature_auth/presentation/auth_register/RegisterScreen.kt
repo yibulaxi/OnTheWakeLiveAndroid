@@ -49,7 +49,7 @@ import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.Regis
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.LastNameChanged
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.PasswordChanged
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.PhoneNumberChanged
-import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.SendOtp
+import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterEvent.SignUp
 import com.onthewake.onthewakelive.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 
@@ -70,12 +70,10 @@ fun RegisterScreen(
     LaunchedEffect(true) {
         viewModel.authResult.collectLatest { authResult ->
             when (authResult) {
-                AuthResult.OtpTooManyRequests -> snackBarHostState.showSnackbar(
-                    message = context.getString(R.string.otp_too_many_requests)
-                )
-                AuthResult.OtpInvalidCredentials -> snackBarHostState.showSnackbar(
-                    message = context.getString(R.string.invalid_phone_number)
-                )
+                AuthResult.Authorized -> navController.navigate(Screen.QueueScreen.route) {
+                    popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                }
+
                 AuthResult.UserAlreadyExist -> snackBarHostState.showSnackbar(
                     message = context.getString(R.string.user_already_exists)
                 )
@@ -92,12 +90,6 @@ fun RegisterScreen(
     LaunchedEffect(key1 = true) {
         viewModel.snackBarEvent.collectLatest { error ->
             snackBarHostState.showSnackbar(message = error.asString(context))
-        }
-    }
-
-    LaunchedEffect(key1 = true) {
-        viewModel.navigateUpEvent.collectLatest { registerData ->
-            navController.navigate(Screen.OtpScreen.passRegisterData(registerData))
         }
     }
 
@@ -186,7 +178,7 @@ fun RegisterScreen(
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        viewModel.onEvent(SendOtp(context = context))
+                        viewModel.onEvent(SignUp)
                         focusManager.clearFocus()
                     }
                 ),
@@ -196,7 +188,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    viewModel.onEvent(SendOtp(context = context))
+                    viewModel.onEvent(SignUp)
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     focusManager.clearFocus()
                 },

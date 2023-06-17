@@ -5,10 +5,5 @@ enum class AuthResult {
     Unauthorized,
     UserAlreadyExist,
     IncorrectData,
-    UnknownError,
-    OtpVerified,
-    IncorrectOtp,
-    OtpInvalidCredentials,
-    OtpTooManyRequests,
-    OtpSentSuccess
+    UnknownError
 }

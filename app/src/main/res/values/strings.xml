@@ -36,8 +36,6 @@
     <string name="user_error">Oops! An error happened. Please contact the support.</string>
     <string name="incorrect_data">Incorrect phone number or password</string>
     <string name="user_already_exists">Oops! User with this phone number already exists</string>
-    <string name="invalid_phone_number">Invalid phone number format</string>
-    <string name="otp_too_many_requests">Too many request on trying to send OTP</string>
 
     // Login Screen
     <string name="sign_in">Sign In</string>

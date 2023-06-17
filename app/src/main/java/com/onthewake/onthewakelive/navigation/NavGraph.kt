@@ -11,9 +11,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.onthewake.onthewakelive.core.utils.Constants.DETAILS_ARGUMENT_KEY
 import com.onthewake.onthewakelive.core.utils.Constants.PICTURE_URL_ARGUMENT_KEY
-import com.onthewake.onthewakelive.core.utils.Constants.REGISTER_DATA_ARGUMENT_KEY
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_login.LoginScreen
-import com.onthewake.onthewakelive.feature_auth.presentation.auth_otp.OtpScreen
 import com.onthewake.onthewakelive.feature_auth.presentation.auth_register.RegisterScreen
 import com.onthewake.onthewakelive.feature_full_size_avatar.presentation.FullSizeAvatarScreen
 import com.onthewake.onthewakelive.feature_profile.presentation.edit_profile.EditProfileScreen
@@ -58,14 +56,6 @@ fun NavGraphBuilder.authNavigation(
         }
         composable(route = Screen.RegisterScreen.route) {
             RegisterScreen(navController = navController)
-        }
-        composable(
-            route = Screen.OtpScreen.route,
-            arguments = listOf(
-                navArgument(REGISTER_DATA_ARGUMENT_KEY) { type = NavType.StringType }
-            )
-        ) {
-            OtpScreen(navController = navController)
         }
     }
 }

@@ -2,7 +2,6 @@ package com.onthewake.onthewakelive.navigation
 
 import com.onthewake.onthewakelive.core.utils.Constants.DETAILS_ARGUMENT_KEY
 import com.onthewake.onthewakelive.core.utils.Constants.PICTURE_URL_ARGUMENT_KEY
-import com.onthewake.onthewakelive.core.utils.Constants.REGISTER_DATA_ARGUMENT_KEY
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -10,9 +9,6 @@ sealed class Screen(val route: String) {
     object ServerUnavailableScreen : Screen("server_unavailable_screen")
     object LoginScreen : Screen("login_screen")
     object RegisterScreen : Screen("register_screen")
-    object OtpScreen : Screen("otp_screen/{$REGISTER_DATA_ARGUMENT_KEY}") {
-        fun passRegisterData(registerData: String): String = "otp_screen/$registerData"
-    }
 
     object QueueScreen : Screen("queue_screen")
     object AddUserToTheQueueScreen : Screen("add_user_to_the_queue_screen")
