@@ -5,7 +5,6 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -73,8 +72,4 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFirebaseStorage(): FirebaseStorage = Firebase.storage
-
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 }

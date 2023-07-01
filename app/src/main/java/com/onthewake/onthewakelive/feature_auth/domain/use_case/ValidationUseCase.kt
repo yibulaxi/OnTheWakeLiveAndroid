@@ -3,7 +3,6 @@ package com.onthewake.onthewakelive.feature_auth.domain.use_case
 import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.utils.UIText
 import com.onthewake.onthewakelive.feature_auth.domain.models.ValidationResult
-import com.onthewake.onthewakelive.feature_queue.domain.module.QueueItem
 
 class ValidationUseCase {
     fun validateFirstName(firstName: String): ValidationResult {
@@ -26,18 +25,6 @@ class ValidationUseCase {
         if (phoneNumber.isBlank()) return ValidationResult(
             successful = false,
             errorMessage = UIText.StringResource(R.string.validate_phone_number_error)
-        )
-        return ValidationResult(successful = true)
-    }
-
-    fun validateAdminAddToQueue(firstName: String, queue: List<QueueItem>): ValidationResult {
-        val formattedFirstName = firstName.trim().lowercase()
-        val isUserAlreadyInQueue = queue.none {
-            it.firstName.lowercase() == formattedFirstName
-        }
-        if (!isUserAlreadyInQueue) return ValidationResult(
-            successful = false,
-            errorMessage = UIText.StringResource(R.string.validate_user_error)
         )
         return ValidationResult(successful = true)
     }

@@ -14,4 +14,9 @@ interface QueueApi {
     suspend fun getProfileDetails(
         @Query("queueItemId") queueItemId: String
     ): Profile
+
+    @GET("/search_users")
+    suspend fun searchUsers(
+        @Query("search_query") searchQuery: String
+    ): List<Profile>
 }

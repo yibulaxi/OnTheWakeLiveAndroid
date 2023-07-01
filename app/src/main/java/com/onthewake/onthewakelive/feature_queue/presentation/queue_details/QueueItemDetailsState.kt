@@ -6,6 +6,7 @@ data class QueueItemDetailsState(
     val isLoading: Boolean = false,
     val error: UIText? = null,
     val userId: String = "",
+    val currentUserId: String? = null,
     val firstName: String = "",
     val lastName: String = "",
     val phoneNumber: String = "",

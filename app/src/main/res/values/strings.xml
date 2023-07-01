@@ -68,7 +68,6 @@
     <string name="left_line">Left line</string>
     <string name="right_line">Right line</string>
 
-
     // Queue Item
     <string name="delete">Delete</string>
 
@@ -99,6 +98,7 @@
 
     // User Data Item
     <string name="not_specified">Not specified</string>
+
 
     // Edit Profile Screen
     <string name="edit_profile">Edit Profile</string>

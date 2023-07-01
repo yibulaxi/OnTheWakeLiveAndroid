@@ -7,6 +7,5 @@ data class QueueState(
     val queue: List<QueueItem> = emptyList(),
     val isQueueLoading: Boolean = false,
     val showLeaveQueueDialog: Boolean = false,
-    val queueItemIdToDelete: String? = null,
-    val showAdminDialog: Boolean = false
+    val queueItemIdToDelete: String? = null
 )

@@ -11,5 +11,7 @@ data class QueueSocketResponse(
 )
 
 enum class Action {
-    JOIN_THE_QUEUE, LEAVE_THE_QUEUE
+    JOIN_THE_QUEUE,
+    LEAVE_THE_QUEUE,
+    ADD_USER_TO_THE_QUEUE
 }

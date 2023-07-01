@@ -25,6 +25,7 @@ import com.onthewake.onthewakelive.R
 import com.onthewake.onthewakelive.core.presentation.components.AnimatedScaffold
 import com.onthewake.onthewakelive.core.presentation.components.StandardImageView
 import com.onthewake.onthewakelive.core.presentation.components.UserDataItem
+import com.onthewake.onthewakelive.core.utils.Constants
 import com.onthewake.onthewakelive.core.utils.addPlusPrefix
 import com.onthewake.onthewakelive.core.utils.openInstagramProfile
 import com.onthewake.onthewakelive.navigation.Screen
@@ -120,7 +121,8 @@ fun QueueItemDetailsScreen(
                 ) {
                     UserDataItem(
                         title = stringResource(id = R.string.instagram),
-                        subtitle = state.instagram
+                        subtitle = state.instagram,
+                        showDivider = false
                     )
                     if (state.instagram.isNotEmpty()) IconButton(
                         onClick = {
@@ -134,14 +136,17 @@ fun QueueItemDetailsScreen(
                         )
                     }
                 }
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
                 UserDataItem(
                     title = stringResource(id = R.string.telegram),
                     subtitle = state.telegram
                 )
-                UserDataItem(
-                    title = stringResource(id = R.string.phone_number),
-                    subtitle = state.phoneNumber.addPlusPrefix()
-                )
+                if (state.currentUserId in Constants.ADMIN_IDS) {
+                    UserDataItem(
+                        title = stringResource(id = R.string.phone_number),
+                        subtitle = state.phoneNumber.addPlusPrefix()
+                    )
+                }
                 UserDataItem(
                     title = stringResource(id = R.string.date_of_birth),
                     subtitle = state.dateOfBirth,

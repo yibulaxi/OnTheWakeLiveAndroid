@@ -57,6 +57,7 @@ object QueueModule {
         QueueServiceImpl(queueApi = queueApi)
 
     @Provides
+    @Singleton
     fun provideQueueSocketService(
         client: HttpClient,
         sharedPreferences: SharedPreferences

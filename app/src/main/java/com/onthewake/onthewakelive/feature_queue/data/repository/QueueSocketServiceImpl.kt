@@ -8,6 +8,7 @@ import com.onthewake.onthewakelive.core.utils.Constants.WS_BASE_URL
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.core.utils.SimpleResource
 import com.onthewake.onthewakelive.core.utils.handleNetworkError
+import com.onthewake.onthewakelive.feature_profile.domain.module.Profile
 import com.onthewake.onthewakelive.feature_queue.data.remote.model.QueueSocketMessage
 import com.onthewake.onthewakelive.feature_queue.domain.module.Action
 import com.onthewake.onthewakelive.feature_queue.domain.module.Line
@@ -87,6 +88,22 @@ class QueueSocketServiceImpl(
             else if (userPositionInLeftQueue - rightQueue.size >= 4) Resource.Success(Unit)
             else Resource.Error(UIText.StringResource(R.string.interval_error))
         } else Resource.Error(UIText.StringResource(R.string.unknown_error))
+    }
+
+    override suspend fun addUserToTheQueue(
+        user: Profile?,
+        firstName: String,
+        line: Line
+    ): Result<Unit> = runCatching {
+        val queueSocketMessage = Json.encodeToString(
+            QueueSocketMessage(
+                action = Action.ADD_USER_TO_THE_QUEUE,
+                line = line,
+                firstName = firstName,
+                user = user
+            )
+        )
+        socket?.send(queueSocketMessage)
     }
 
     override suspend fun joinTheQueue(

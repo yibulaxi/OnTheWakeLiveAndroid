@@ -2,7 +2,6 @@ package com.onthewake.onthewakelive.di
 
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
-import com.google.firebase.auth.FirebaseAuth
 import com.onthewake.onthewakelive.core.utils.Constants.BASE_URL
 import com.onthewake.onthewakelive.feature_auth.data.remote.AuthApi
 import com.onthewake.onthewakelive.feature_auth.data.repository.AuthRepositoryImpl
@@ -35,12 +34,10 @@ object AuthModule {
     @Singleton
     fun provideAuthRepository(
         api: AuthApi,
-        firebaseAuth: FirebaseAuth,
         dataStore: DataStore<Profile>,
         sharedPreferences: SharedPreferences
     ): AuthRepository = AuthRepositoryImpl(
         api = api,
-        firebaseAuth = firebaseAuth,
         dataStore = dataStore,
         sharedPreferences = sharedPreferences
     )

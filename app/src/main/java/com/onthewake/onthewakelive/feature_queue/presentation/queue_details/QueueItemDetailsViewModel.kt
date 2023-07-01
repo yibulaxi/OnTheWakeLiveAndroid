@@ -1,10 +1,12 @@
 package com.onthewake.onthewakelive.feature_queue.presentation.queue_details
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onthewake.onthewakelive.core.utils.Constants
 import com.onthewake.onthewakelive.core.utils.Constants.DETAILS_ARGUMENT_KEY
 import com.onthewake.onthewakelive.core.utils.Resource
 import com.onthewake.onthewakelive.feature_queue.domain.repository.QueueService
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class QueueItemDetailsViewModel @Inject constructor(
     private val queueService: QueueService,
+    sharedPreferences: SharedPreferences,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -25,6 +28,9 @@ class QueueItemDetailsViewModel @Inject constructor(
         savedStateHandle.get<String>(DETAILS_ARGUMENT_KEY)?.let { queueItemId ->
             getQueueItemDetails(queueItemId)
         }
+        _state.value = state.value.copy(
+            currentUserId = sharedPreferences.getString(Constants.PREFS_USER_ID, null)
+        )
     }
 
     private fun getQueueItemDetails(queueItemId: String) {
